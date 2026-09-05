@@ -1,4 +1,4 @@
-# Hypertrophy & Hinge Re-entry Tracker v4.1
+# Hypertrophy & Hinge Re-entry Tracker v4.2
 
 A single-file, build-free workout tracker. Upper/Lower split with antagonist
 supersets, designed around spine-sparing (no standing axial loading) on a home
@@ -32,6 +32,14 @@ bands, and a weight vest.
   **Edit** and **×** controls — Edit loads it back into the form, saving
   updates it in place. Past sessions: tap **edit** on any set line in History
   for an inline number fix.
+- Progress: filter History by exercise for a top-set est. 1RM sparkline
+  (green dots = PR sessions), best-ever set, and trend. Stall detection
+  compares your last 3 sessions of a lift against the prior 3 (~5 weeks):
+  flat or regressing lifts get flagged when you open them and in the session
+  recap. Top-of-range nudges get an **Apply** button that pre-sets the next
+  weight in one tap.
+- Bodyweight lifts (pull-ups, dips) use a bodyweight estimate in Settings
+  (default 180 lb) for progress math.
 - **History tab** → everything grouped by session, filterable, JSON
   export/import for backups. Export regularly.
 

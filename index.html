@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<title>Hypertrophy &amp; Hinge Re-entry Tracker v4.1</title>
+<title>Hypertrophy &amp; Hinge Re-entry Tracker v4.2</title>
 <style>
 :root {
   --bg: #0f1216;
@@ -251,6 +251,16 @@ input.notes-in:focus { outline: none; border-color: var(--blue); }
 .mini.danger { color: #f87171; }
 .mini:hover { background: var(--panel2); }
 .linkish { background: none; border: none; color: var(--amber); text-decoration: underline; cursor: pointer; font-size: 12px; padding: 0; font-family: inherit; }
+.banner.warn { border-color: var(--amber); background: rgba(251, 191, 36, 0.06); }
+.spark { width: 100%; height: auto; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; display: block; }
+.spark-lb { fill: var(--mut); font-size: 8.5px; }
+.pstats { font-size: 13px; margin-top: 10px; display: grid; gap: 5px; }
+.pstats .mut { color: var(--mut); }
+.st-ok { color: var(--green); font-weight: 600; }
+.st-warn { color: var(--amber); font-weight: 600; }
+.st-bad { color: var(--red); font-weight: 600; }
+.recap-grid { display: grid; gap: 6px; font-size: 14px; margin: 10px 0 14px; }
+.recap-grid b { color: var(--blue); }
 .empty { color: var(--mut); font-size: 13px; font-style: italic; }
 
 /* ---------- Settings ---------- */
@@ -274,7 +284,7 @@ footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line);
 <body>
 <div class="container">
   <header>
-    <h1>Hypertrophy &amp; Hinge Re-entry Tracker <span class="version">v4.1</span></h1>
+    <h1>Hypertrophy &amp; Hinge Re-entry Tracker <span class="version">v4.2</span></h1>
     <div class="subtitle">Upper/Lower &middot; Antagonist Supersets &middot; Spine-Sparing &middot; Hyper Pro Edition</div>
   </header>
 
@@ -305,7 +315,7 @@ footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line);
     </section>
   </main>
 
-  <footer>Lifting Tracker v4.1 &middot; All data stays on this device &middot; Export backups regularly from History</footer>
+  <footer>Lifting Tracker v4.2 &middot; All data stays on this device &middot; Export backups regularly from History</footer>
 </div>
 <div id="toast" class="toast"></div>
 
@@ -562,7 +572,7 @@ function showPanel(id) {
 
 /* ================= program tab ================= */
 
-const state = { progDay: 'day1', openEx: null, sessOverride: '', histEx: '', histDay: '', editingSetId: null, histEditId: null };
+const state = { progDay: 'day1', openEx: null, sessOverride: '', histEx: '', histDay: '', editingSetId: null, histEditId: null, recapId: null };
 
 function renderProtocol() {
   $('#protocolBox').innerHTML =
@@ -674,28 +684,106 @@ function summaryLine(ex) {
   }).join(' \u00b7 ');
 }
 
+function e1RM(w, r) { return w * (1 + Math.min(r, 15) / 30); }
+
+function bwEst() { const v = Number(load(DB.settings, {}).bwEst); return v > 0 ? v : 180; }
+
+function scoreOfSet(ex, s) {
+  if (!ex || ex.log.type === 'done') return null;
+  if (ex.log.type === 'distance') return ((s.weight || 0) * (s.distance || 0)) || null;
+  const r = s.reps;
+  if (r == null || r <= 0) return null;
+  const w = s.weight || 0;
+  if (ex.log.type === 'bodyweight') return e1RM(w + bwEst(), r);
+  if (w <= 0) return null;
+  return e1RM(w, r);
+}
+
+function progressData(exId) {
+  const ex = EX[exId];
+  if (!ex) return [];
+  const bySess = {};
+  allSets().filter(s => s.exerciseId === exId).forEach(s => { (bySess[s.sessionId] = bySess[s.sessionId] || []).push(s); });
+  const sessMap = {};
+  allSessions().forEach(se => { sessMap[se.id] = se; });
+  return Object.keys(bySess).map(sid => {
+    const sets = bySess[sid];
+    let best = null, bestSet = null;
+    sets.forEach(s => {
+      const sc = scoreOfSet(ex, s);
+      if (sc != null && (best == null || sc > best)) { best = sc; bestSet = s; }
+    });
+    return { sid, ts: sets[0].ts, date: sessMap[sid] ? fmtDate(sessMap[sid].startedAt) : '', score: best, bestLabel: bestSet ? setLabel(bestSet) : '', hasPR: sets.some(s => s.pr) };
+  }).sort((a, b) => a.ts - b.ts);
+}
+
+function bestScoreBefore(exId, ts) {
+  const ex = EX[exId];
+  let best = null;
+  allSets().filter(s => s.exerciseId === exId && s.ts < ts).forEach(s => {
+    const sc = scoreOfSet(ex, s);
+    if (sc != null && (best == null || sc > best)) best = sc;
+  });
+  return best;
+}
+
+function stallInfo(exId) {
+  const data = progressData(exId).filter(d => d.score != null);
+  if (data.length < 6) return { status: 'too-few', n: data.length };
+  const cur = data.slice(-3), prev = data.slice(-6, -3);
+  const c = Math.max(...cur.map(d => d.score));
+  const p = Math.max(...prev.map(d => d.score));
+  const pct = p > 0 ? Math.round((c / p - 1) * 1000) / 10 : 0;
+  const weeks = Math.max(1, Math.round((cur[cur.length - 1].ts - prev[0].ts) / (7 * 864e5)));
+  let bestCur = cur[0];
+  cur.forEach(d => { if (d.score > bestCur.score) bestCur = d; });
+  if (c < p * 0.95) return { status: 'regressing', pct, bestLabel: bestCur.bestLabel, weeks };
+  if (c <= p * 1.001) return { status: 'flat', pct, bestLabel: bestCur.bestLabel, weeks };
+  return { status: 'progressing', pct, bestLabel: bestCur.bestLabel, weeks };
+}
+
 function suggestion(ex) {
-  if (ex.log.type === 'done') return '';
+  if (ex.log.type === 'done') return { text: '' };
   const lp = lastPerf(ex.id);
-  if (!lp) return '';
+  if (!lp) return { text: '' };
   const repsVals = lp.sets.map(s => s.reps).filter(v => v != null);
-  if (!repsVals.length) return '';
+  if (!repsVals.length) return { text: '' };
+  const out = { text: '', apply: null, applyLabel: '' };
   if (repsVals.every(v => v >= ex.rangeHi)) {
-    if (ex.dbCapped) {
-      const w = lp.sets[lp.sets.length - 1].weight;
-      if (ex.log.type === 'bodyweight') return 'Top of range \u2014 add vest load.';
-      if (w != null && w >= 45) return 'Top of range at 45s \u2014 add vest weight or slow the eccentric.';
-      return 'Top of range \u2014 consider ' + ((w || 0) + ex.log.step) + ' lbs next.';
-    }
     const w = lp.sets[lp.sets.length - 1].weight || 0;
-    return ex.log.type === 'distance'
-      ? 'Top of range \u2014 go heavier or longer next time.'
-      : 'Top of range \u2014 consider ' + (w + ex.log.step) + ' lbs next.';
+    if (ex.log.type === 'bodyweight') {
+      out.text = 'Top of range \u2014 add vest load.';
+      out.apply = w + ex.log.step;
+      out.applyLabel = `Apply +${ex.log.step} lb vest`;
+    } else if (ex.dbCapped && w >= 45) {
+      out.text = 'Top of range at 45s \u2014 add vest weight or slow the eccentric.';
+    } else if (ex.log.type === 'distance') {
+      out.text = 'Top of range \u2014 go heavier or longer next time.';
+    } else {
+      out.text = `Top of range \u2014 consider ${w + ex.log.step} lbs next.`;
+      out.apply = w + ex.log.step;
+      out.applyLabel = `Apply ${w + ex.log.step} lb`;
+    }
+  } else if (ex.log.type !== 'distance' && repsVals.some(v => v < ex.rangeLo)) {
+    out.text = 'Missed target reps last time \u2014 hold this weight and skip the finisher.';
   }
-  if (ex.log.type !== 'distance' && repsVals.some(v => v < ex.rangeLo)) {
-    return 'Missed target reps last time \u2014 hold this weight and skip the finisher.';
-  }
+  return out;
+}
+
+function stallAdvice(ex) {
+  const st = stallInfo(ex.id);
+  if (st.status === 'flat') return `Flat for ~${st.weeks} wks (best ${st.bestLabel}) \u2014 rotate the overload method: vest, 3s eccentrics, 1.5 reps, or lengthened partials. An intentionally lighter week helps too.`;
+  if (st.status === 'regressing') return `Down ${Math.abs(st.pct)}% over ~${st.weeks} wks (best ${st.bestLabel}) \u2014 take an intentionally lighter week and check sleep, food, and stress before pushing harder.`;
   return '';
+}
+
+function applySuggestion(exId) {
+  const sug = suggestion(EX[exId]);
+  if (sug && sug.apply != null) {
+    draft[exId].weight = sug.apply;
+    renderSession();
+    toast('Weight set to ' + sug.apply + ' lb');
+  }
 }
 
 /* ================= session: draft state ================= */
@@ -767,6 +855,10 @@ function logSet(exId) {
     if (entry.reps === null) { toast('Enter reps first', true); return; }
   }
 
+  const priorBest = bestScoreBefore(exId, entry.ts);
+  const myScore = scoreOfSet(ex, entry);
+  entry.pr = myScore != null && (priorBest == null || myScore > priorBest + 0.01);
+
   const sets = allSets();
   if (state.editingSetId) {
     const idx = sets.findIndex(s => s.id === state.editingSetId);
@@ -788,7 +880,7 @@ function logSet(exId) {
   sets.push(entry);
   if (save(DB.sets, sets)) {
     d.notes = '';
-    toast('Set logged \u2713');
+    toast(entry.pr ? 'Set logged \uD83C\uDFC6 new PR!' : 'Set logged \u2713');
     renderSession();
   }
 }
@@ -829,6 +921,12 @@ function delSessionSet(exId, setId) {
 function renderSession() {
   const body = $('#sessionBody');
   const sess = activeSession();
+
+  if (!sess && state.recapId) {
+    const se = allSessions().find(x => x.id === state.recapId);
+    if (se) { renderRecap(body, se); return; }
+    state.recapId = null;
+  }
 
   if (!sess) {
     const auto = state.sessOverride || nextDayKey();
@@ -911,11 +1009,13 @@ function logCardHtml(ex, loggedSets) {
   const isEdit = editIdx >= 0;
   const baseLabel = t === 'done' ? 'Mark Done' : (isEdit ? 'Update Set' : 'Log Set');
   const saveLabel = `${baseLabel} (${loggedCount}/${ex.sets})`;
+  const sug = suggestion(ex);
+  const stallTxt = stallAdvice(ex);
 
   const setsListHtml = loggedSets.map((s, i) => {
     const editing = s.id === state.editingSetId;
     return `<div class="setrow ${editing ? 'editing' : ''}">` +
-      `<span class="sr-l">Set ${i + 1}: ${escapeHtml(setLabel(s))}${s.rir != null ? ' @' + s.rir + 'R' : ''}${s.side ? ' \u00b7 ' + escapeHtml(s.side) : ''}${s.techniques && s.techniques.length ? ' \u00b7 ' + escapeHtml(s.techniques.map(k => TECHNIQUE_LABELS[k]).join(', ')) : ''}</span>` +
+      `<span class="sr-l">Set ${i + 1}: ${s.pr ? '\uD83C\uDFC6 ' : ''}${escapeHtml(setLabel(s))}${s.rir != null ? ' @' + s.rir + 'R' : ''}${s.side ? ' \u00b7 ' + escapeHtml(s.side) : ''}${s.techniques && s.techniques.length ? ' \u00b7 ' + escapeHtml(s.techniques.map(k => TECHNIQUE_LABELS[k]).join(', ')) : ''}</span>` +
       `<span class="sr-b">` +
       `<button class="mini ${editing ? 'ok' : ''}" onclick="startEditSet('${id}','${s.id}')">${editing ? 'Editing' : 'Edit'}</button>` +
       `<button class="mini danger" onclick="delSessionSet('${id}','${s.id}')">\u00d7</button>` +
@@ -924,7 +1024,8 @@ function logCardHtml(ex, loggedSets) {
 
   return `<div class="logcard">` +
     (editIdx >= 0 ? `<div class="suggest">\u270E Editing set ${editIdx + 1} \u2014 change the values, then press Update. <button class="linkish" onclick="cancelEditSet()">cancel</button></div>` : '') +
-    (suggestion(ex) ? `<div class="suggest">\u2191 ${escapeHtml(suggestion(ex))}</div>` : '') +
+    (sug.text ? `<div class="suggest">\u2191 ${escapeHtml(sug.text)}${sug.apply != null ? ` <button class="linkish" onclick="applySuggestion('${id}')">${escapeHtml(sug.applyLabel)}</button>` : ''}</div>` : '') +
+    (stallTxt ? `<div class="suggest">\u26A0 ${escapeHtml(stallTxt)}</div>` : '') +
     fields + rirRow + sideRow + techRow +
     `<div class="lcrow"><span class="fieldlbl">Notes</span><input class="notes-in" placeholder="Optional \u2014 cue reminders, how it felt\u2026" oninput="setDraft('${id}','notes',this.value)"></div>` +
     `<div class="lcbtns">` +
@@ -950,8 +1051,36 @@ function startSession(dayKey) {
   if (!save(DB.sessions, sessions)) return;
   save(DB.active, s);
   state.openEx = null;
+  state.recapId = null;
   renderSession();
   toast('Session started \u2014 ' + PROGRAM.days[dayKey].label);
+}
+
+function renderRecap(body, se) {
+  const d = PROGRAM.days[se.dayKey];
+  const ssets = allSets().filter(s => s.sessionId === se.id);
+  const prs = ssets.filter(s => s.pr);
+  const exIds = [...new Set(ssets.map(s => s.exerciseId))];
+  const stalled = exIds.map(id => ({ ex: EX[id], st: stallInfo(id) }))
+    .filter(x => x.ex && (x.st.status === 'flat' || x.st.status === 'regressing'));
+  const nextKey = nextDayKey();
+  body.innerHTML =
+    `<div class="section"><div class="section-title">Session Recap \u00b7 ${escapeHtml(d.label)}</div>` +
+    `<div class="recap-grid">` +
+    `<div>Duration: <b>${fmtDur((se.endedAt || Date.now()) - se.startedAt)}</b></div>` +
+    `<div>Sets logged: <b>${ssets.length}</b> across ${exIds.length} exercises</div>` +
+    (prs.length
+      ? `<div>PRs: <b>${prs.map(s => escapeHtml((EX[s.exerciseId] ? EX[s.exerciseId].name : '') + ' \u2014 ' + setLabel(s))).join(', ')}</b> \uD83C\uDFC6</div>`
+      : `<div>No PRs this session \u2014 they come with volume.</div>`) +
+    (stalled.length
+      ? `<div class="st-warn">Stalled: ${stalled.map(x => escapeHtml(x.ex.name)).join(', ')} \u2014 consider rotating overload methods next time.</div>`
+      : '') +
+    `</div>` +
+    `<div class="row-btns">` +
+    `<button class="btn primary" id="recapStart">Start next: ${escapeHtml(PROGRAM.days[nextKey].short)}</button>` +
+    `<button class="btn" id="recapClose">Close</button></div></div>`;
+  $('#recapStart').addEventListener('click', () => { state.recapId = null; startSession(nextKey); });
+  $('#recapClose').addEventListener('click', () => { state.recapId = null; renderSession(); });
 }
 
 function finishSession() {
@@ -963,8 +1092,8 @@ function finishSession() {
   save(DB.sessions, allSessions().map(x => x.id === s.id ? s : x));
   localStorage.removeItem(DB.active);
   state.openEx = null;
+  state.recapId = s.id;
   renderSession();
-  toast('Session finished \u2014 ' + fmtDur(s.endedAt - s.startedAt));
 }
 
 /* ================= voice ================= */
@@ -1128,6 +1257,61 @@ async function applyTranscript(exId, text) {
 
 /* ================= history ================= */
 
+function sparklineSvg(pdata) {
+  const pts = pdata.slice(-12).filter(d => d.score != null);
+  if (pts.length < 2) return '';
+  const W = 340, H = 90, P = 8;
+  const xs = pts.map((_, i) => P + i * (W - 2 * P) / (pts.length - 1));
+  const vals = pts.map(p => p.score);
+  const min = Math.min(...vals), max = Math.max(...vals);
+  const span = (max - min) || 1;
+  const ys = vals.map(v => H - 14 - (v - min) * (H - 26) / span);
+  const poly = xs.map((x, i) => `${x.toFixed(1)},${ys[i].toFixed(1)}`).join(' ');
+  const dots = pts.map((p, i) =>
+    `<circle cx="${xs[i].toFixed(1)}" cy="${ys[i].toFixed(1)}" r="2.5" fill="${p.hasPR ? 'var(--green)' : 'var(--blue)'}" />`
+  ).join('');
+  const labels =
+    `<text x="${P}" y="${H - 2}" class="spark-lb">${escapeHtml(pts[0].date.slice(5))}</text>` +
+    `<text x="${W - P}" y="${H - 2}" text-anchor="end" class="spark-lb">${escapeHtml(pts[pts.length - 1].date.slice(5))}</text>` +
+    `<text x="${P}" y="9" class="spark-lb">top-set est. 1RM \u00b7 ${min.toFixed(1)}\u2013${max.toFixed(1)} \u00b7 green = PR session</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" class="spark" role="img" aria-label="Progress chart">` +
+    `<polyline points="${poly}" fill="none" stroke="var(--blue)" stroke-width="2" />${dots}${labels}</svg>`;
+}
+
+function progressBlockHtml(ex, pdata) {
+  const scored = pdata.filter(d => d.score != null);
+  if (!scored.length) return '';
+  const best = scored.reduce((m, d) => (d.score > m.score ? d : m), scored[0]);
+  const st = stallInfo(ex.id);
+  let statusHtml = '';
+  if (st.status === 'progressing') statusHtml = `<span class="st-ok">\u25B2 +${st.pct}% over ~${st.weeks} wks</span>`;
+  else if (st.status === 'flat') statusHtml = `<span class="st-warn">\u25AC Flat ~${st.weeks} wks</span>`;
+  else if (st.status === 'regressing') statusHtml = `<span class="st-bad">\u25BC ${st.pct}% over ~${st.weeks} wks</span>`;
+  else statusHtml = `<span class="st-warn">${st.n} session${st.n === 1 ? '' : 's'} \u2014 trend appears after ~6</span>`;
+  return `<div class="section progress-block">` +
+    `<div class="section-title">Progress \u00b7 ${escapeHtml(ex.name)}</div>` +
+    sparklineSvg(pdata) +
+    `<div class="pstats">` +
+    `<div>Best ever: <b>${escapeHtml(best.bestLabel)}</b> <span class="mut">(e1RM ${best.score.toFixed(1)}${best.hasPR ? ' \u00b7 \uD83C\uDFC6' : ''})</span></div>` +
+    `<div>Trend: ${statusHtml}</div>` +
+    `</div></div>`;
+}
+
+function backupBannerHtml() {
+  const st = load(DB.settings, {});
+  if (allSets().length < 20) return '';
+  const last = st.lastExportAt || 0;
+  const days = Math.floor((Date.now() - last) / 864e5);
+  if (last && days < 30) return '';
+  const dismissed = st.backupDismissedAt || 0;
+  if (dismissed && (Date.now() - dismissed) < 30 * 864e5) return '';
+  const msg = last ? `Last backup ${days} days ago` : 'No backup yet';
+  return `<div class="banner warn">\uD83D\uDCBE <b>${msg}</b> \u2014 your log lives only in this browser. ` +
+    `<button class="linkish" id="bannerExport">Export JSON now</button> \u00b7 ` +
+    `<button class="linkish" id="bannerDismiss">remind me later</button></div>`;
+}
+
+
 function renderHistory() {
   const body = $('#historyBody');
   const sessions = [...allSessions()].sort((a, b) => b.startedAt - a.startedAt);
@@ -1153,12 +1337,14 @@ function renderHistory() {
 
   let listHtml = '';
   if (state.histEx) {
+    const exObj = EX[state.histEx];
+    const block = progressBlockHtml(exObj, progressData(state.histEx));
     const fsets = sets.filter(s => s.exerciseId === state.histEx)
       .sort((a, b) => b.ts - a.ts)
       .filter(s => !state.histDay || (allSessions().find(x => x.id === s.sessionId) || {}).dayKey === state.histDay);
-    listHtml = fsets.length
+    listHtml = block + (fsets.length
       ? fsets.map(s => setLineHtml(s, EX[s.exerciseId], true)).join('')
-      : '<p class="empty">No sets logged for this exercise yet.</p>';
+      : '<p class="empty">No sets logged for this exercise yet.</p>');
   } else {
     const visible = sessions.filter(se => {
       if (state.histDay && se.dayKey !== state.histDay) return false;
@@ -1168,10 +1354,17 @@ function renderHistory() {
       : '<p class="empty">No sessions yet. Start one from the Session tab.</p>';
   }
 
-  body.innerHTML = head + `<div id="histList">${listHtml}</div>`;
+  body.innerHTML = backupBannerHtml() + head + `<div id="histList">${listHtml}</div>`;
   $('#fEx').addEventListener('change', e => { state.histEx = e.target.value; renderHistory(); });
   $('#fDay').addEventListener('change', e => { state.histDay = e.target.value; renderHistory(); });
   $('#exportBtn').addEventListener('click', exportData);
+  const bx = $('#bannerExport');
+  if (bx) bx.addEventListener('click', () => { exportData(); renderHistory(); });
+  const bd = $('#bannerDismiss');
+  if (bd) bd.addEventListener('click', () => {
+    save(DB.settings, Object.assign(load(DB.settings, {}), { backupDismissedAt: Date.now() }));
+    renderHistory();
+  });
   $$('#histList .editset').forEach(b => b.addEventListener('click', () => startHistEdit(b.dataset.edit)));
   $$('#histList .delset').forEach(b => b.addEventListener('click', () => delSet(b.dataset.set)));
   $$('#histList .delsess').forEach(b => b.addEventListener('click', () => delSession(b.dataset.sess)));
@@ -1183,9 +1376,9 @@ function setLineHtml(s, ex, showExName) {
   if (s.rir != null) metaBits.push(s.rir + ' RIR');
   if (s.side) metaBits.push(s.side);
   if (s.techniques && s.techniques.length) metaBits.push(s.techniques.map(k => TECHNIQUE_LABELS[k]).join(', '));
-  const main = ex.log.type === 'done'
+  const main = (s.pr ? '\uD83C\uDFC6 ' : '') + (ex.log.type === 'done'
     ? (s.reps != null ? s.reps + ' reps' : 'done')
-    : setLabel(s);
+    : setLabel(s));
   return `<div class="setline"><span>${showExName ? `<span class="exn">${escapeHtml(ex.name)}</span> \u00b7 ` : ''}` +
     `<span class="sets">${escapeHtml(main)}</span>` +
     (metaBits.length ? ` <span class="nt">(${escapeHtml(metaBits.join(' \u00b7 '))})</span>` : '') +
@@ -1298,6 +1491,7 @@ function exportData() {
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  save(DB.settings, Object.assign(load(DB.settings, {}), { lastExportAt: Date.now() }));
   toast('Backup downloaded');
 }
 
@@ -1330,6 +1524,7 @@ function renderSettings() {
     `<div><label for="sUrl">API endpoint (chat/completions URL)</label><input class="ctl" id="sUrl" style="width:100%" placeholder="e.g. https://api.z.ai/api/paas/v4/chat/completions" value="${escapeHtml(st.llmUrl || '')}"></div>` +
     `<div><label for="sKey">API key</label><input class="ctl" id="sKey" type="password" style="width:100%" placeholder="sk-\u2026" value="${escapeHtml(st.llmKey || '')}"></div>` +
     `<div><label for="sModel">Model</label><input class="ctl" id="sModel" style="width:100%" placeholder="e.g. glm-4.6" value="${escapeHtml(st.llmModel || '')}"></div>` +
+    `<div><label for="sBw">Bodyweight estimate (lb) \u2014 used for pull-up / dip progress math</label><input class="ctl" id="sBw" inputmode="numeric" style="width:100%" placeholder="180" value="${escapeHtml(st.bwEst || '')}"></div>` +
     `</div>` +
     `<div class="row-btns" style="margin-top:12px">` +
     `<button class="btn primary" id="saveSettings">Save</button>` +
@@ -1344,14 +1539,15 @@ function renderSettings() {
     `<p class="hint">Backups contain sessions and sets \u2014 not your API key. Export before switching phones or clearing browser data.</p></div>` +
 
     `<div class="section"><div class="section-title">About</div>` +
-    `<p class="hint" style="margin-top:0">v4.1 \u2014 session-first logger: start a session, tap through exercises with last-time weights prefilled, voice-log sets, and watch progression nudges. Logged a set wrong? Edit or delete it right in the exercise card, or edit any past set from History. Program edits live in the PROGRAM block at the top of index.html; logs reference exercises by stable id so renames never break history.</p></div>`;
+    `<p class="hint" style="margin-top:0">v4.2 \u2014 session-first logger with progress tracking: per-exercise sparkline and PR detection in History, one-tap weight progression, stall detection (last 3 sessions vs prior 3, ~5 weeks per lift), a session recap on finish, and backup reminders. Program edits live in the PROGRAM block at the top of index.html; logs reference exercises by stable id so renames never break history.</p></div>`;
 
   $('#saveSettings').addEventListener('click', () => {
-    save(DB.settings, {
+    save(DB.settings, Object.assign(load(DB.settings, {}), {
       llmUrl: $('#sUrl').value.trim(),
       llmKey: $('#sKey').value.trim(),
-      llmModel: $('#sModel').value.trim()
-    });
+      llmModel: $('#sModel').value.trim(),
+      bwEst: parseFloat($('#sBw').value) || ''
+    }));
     toast('Settings saved \u2713');
   });
   $('#testSettings').addEventListener('click', async () => {

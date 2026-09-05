@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f1216">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Hypertrophy &amp; Hinge Re-entry Tracker v4.0</title>
+<style>
+:root {
+  --bg: #0f1216;
+  --panel: #181c22;
+  --panel2: #1f242c;
+  --line: #2a3038;
+  --text: #e6e9ef;
+  --mut: #9aa3b2;
+  --blue: #4f8cff;
+  --green: #34d399;
+  --purple: #8b5cf6;
+  --amber: #fbbf24;
+  --red: #ef4444;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  font-size: 15px;
+}
+
+.container { max-width: 960px; margin: 0 auto; padding: 24px 14px 90px; }
+
+header { border-bottom: 1px solid var(--line); padding-bottom: 16px; margin-bottom: 16px; }
+h1 { font-size: 21px; margin: 0 0 4px; font-weight: 700; }
+h1 .version {
+  background: var(--blue); color: #fff; padding: 2px 8px; border-radius: 4px;
+  font-size: 13px; vertical-align: middle; margin-left: 8px; font-weight: 600;
+}
+.subtitle { color: var(--mut); font-size: 13px; }
+
+.protocol {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+  padding: 14px 16px; margin: 16px 0; font-size: 13px; color: #cfd5e0;
+}
+.protocol strong {
+  color: var(--amber); text-transform: uppercase; font-size: 11px;
+  letter-spacing: 1px; display: block; margin-bottom: 6px;
+}
+.protocol ul { margin: 0; padding-left: 18px; }
+.protocol li { margin-bottom: 8px; }
+.protocol li strong { display: inline; color: var(--text); letter-spacing: 0; font-size: 13px; text-transform: none; }
+
+nav.tabs {
+  display: flex; overflow-x: auto; gap: 6px; margin: 0 0 20px; padding: 6px;
+  background: var(--panel); border-radius: 8px; border: 1px solid var(--line);
+  -webkit-overflow-scrolling: touch;
+  position: sticky; top: 0; z-index: 20;
+}
+nav.tabs button {
+  background: transparent; border: 1px solid transparent; color: var(--mut);
+  padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 14px;
+  font-weight: 500; transition: all 0.15s; white-space: nowrap; flex: 1 0 auto;
+  min-height: 44px;
+}
+nav.tabs button:hover { background: var(--panel2); color: var(--text); }
+nav.tabs button.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+.panel { display: none; }
+.panel.active { display: block; }
+
+.daytabs { display: flex; gap: 6px; overflow-x: auto; margin: 0 0 14px; padding-bottom: 2px; -webkit-overflow-scrolling: touch; }
+.daytabs button {
+  background: var(--panel); border: 1px solid var(--line); color: var(--mut);
+  padding: 9px 14px; border-radius: 999px; cursor: pointer; font-size: 13px;
+  font-weight: 500; white-space: nowrap; min-height: 40px;
+}
+.daytabs button.on { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+.day-header {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  margin-bottom: 14px; flex-wrap: wrap; gap: 8px; padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+.day-header h2 { margin: 0; font-size: 19px; font-weight: 600; }
+.day-tag {
+  font-size: 11px; color: var(--mut); text-transform: uppercase; letter-spacing: 0.5px;
+  background: var(--panel2); padding: 4px 10px; border-radius: 4px;
+}
+
+.section {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+  padding: 14px; margin-bottom: 14px;
+}
+.section-title {
+  margin: 0 0 12px; font-size: 12px; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--blue); font-weight: 600;
+}
+
+.exercise {
+  border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px;
+  margin-bottom: 8px; background: var(--panel2);
+}
+.exercise.superset { border-left: 3px solid var(--purple); }
+.exercise:last-child { margin-bottom: 0; }
+.exercise-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
+.exercise-name { font-weight: 600; font-size: 15px; }
+.exercise-tag {
+  font-size: 10px; color: var(--mut); background: var(--panel); padding: 2px 8px;
+  border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+}
+.exercise-sets { font-size: 13px; color: var(--green); margin-bottom: 6px; font-weight: 500; }
+.exercise-notes { font-size: 13px; color: var(--mut); font-style: italic; }
+
+.callout {
+  background: rgba(139, 92, 246, 0.1); border-left: 3px solid var(--purple);
+  padding: 8px 12px; margin: 8px 0 14px; font-size: 13px; border-radius: 4px; color: #cfd5e0;
+}
+.callout strong { color: var(--purple); }
+
+/* ---------- Session ---------- */
+.banner {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+  padding: 16px; margin-bottom: 14px;
+}
+.banner .next-line { font-size: 15px; margin-bottom: 12px; }
+.banner .next-line b { color: var(--blue); }
+.hint { color: var(--mut); font-size: 12px; margin-top: 12px; }
+
+.btn {
+  background: var(--panel2); border: 1px solid var(--line); color: var(--text);
+  padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 14px;
+  min-height: 44px; font-weight: 500;
+}
+.btn:hover { background: #262c36; }
+.btn.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+.btn.danger { color: #f87171; }
+.btn.small { padding: 6px 10px; min-height: 36px; font-size: 12px; }
+select.ctl, input.ctl {
+  background: var(--panel2); border: 1px solid var(--line); color: var(--text);
+  padding: 9px 10px; border-radius: 6px; font-size: 14px; font-family: inherit; min-height: 42px;
+}
+
+.sess-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.sess-head h2 { margin: 0; font-size: 19px; }
+.sess-head .meta { color: var(--mut); font-size: 13px; }
+
+.exrow {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+  margin-bottom: 10px; overflow: hidden;
+}
+.exrow.done-row { border-color: rgba(52, 211, 153, 0.45); }
+.exrow-head {
+  width: 100%; text-align: left; background: var(--panel2); border: none;
+  color: var(--text); padding: 12px 14px; cursor: pointer; font-family: inherit;
+  display: block;
+}
+.exrow-head .r1 { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.exrow-head .r1 .nm { font-weight: 600; font-size: 15px; }
+.exrow-head .r1 .rx { color: var(--green); font-size: 12px; white-space: nowrap; }
+.exrow-head .r2 { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 6px; }
+.exrow-head .sum { color: var(--mut); font-size: 12px; }
+.dots { display: flex; gap: 5px; flex-shrink: 0; }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
+.dot.on { background: var(--green); }
+
+.logcard { padding: 12px 14px 14px; border-top: 1px solid var(--line); }
+.lcrow { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.fieldlbl { font-size: 12px; color: var(--mut); width: 96px; flex-shrink: 0; }
+.stepper { display: flex; align-items: stretch; }
+.stepper button {
+  width: 46px; min-height: 42px; background: var(--panel2); border: 1px solid var(--line);
+  color: var(--text); font-size: 20px; cursor: pointer; font-family: inherit;
+}
+.stepper button:active { background: #2a313c; }
+.stepper button:first-child { border-radius: 6px 0 0 6px; }
+.stepper button:last-child { border-radius: 0 6px 6px 0; }
+.stepper input {
+  width: 76px; text-align: center; background: var(--bg); border: 1px solid var(--line);
+  border-left: none; border-right: none; color: var(--text); font-size: 16px; font-family: inherit;
+  min-height: 42px;
+}
+.stepper input:focus { outline: none; border-color: var(--blue); }
+input.notes-in {
+  flex: 1; min-width: 200px; background: var(--bg); border: 1px solid var(--line);
+  color: var(--text); border-radius: 6px; padding: 9px 10px; font-size: 13px; font-family: inherit;
+  min-height: 42px;
+}
+input.notes-in:focus { outline: none; border-color: var(--blue); }
+
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip {
+  background: var(--panel2); border: 1px solid var(--line); color: var(--mut);
+  padding: 8px 12px; border-radius: 999px; cursor: pointer; font-size: 12px;
+  font-weight: 500; min-height: 36px; font-family: inherit;
+}
+.chip.on { background: rgba(139, 92, 246, 0.22); border-color: var(--purple); color: #d6c6f8; }
+.chip.rir.on { background: rgba(79, 140, 255, 0.2); border-color: var(--blue); color: #a9c7ff; }
+
+.lcbtns { display: flex; gap: 8px; margin-top: 4px; }
+.btn.mic { font-size: 18px; padding: 10px 14px; }
+.btn.mic.rec { background: var(--red); border-color: var(--red); animation: pulse 1.2s infinite; }
+@keyframes pulse { 50% { opacity: 0.65; } }
+.btn.save { flex: 1; }
+.vstatus { color: var(--mut); font-size: 12px; margin-top: 8px; min-height: 16px; }
+.suggest { color: var(--amber); font-size: 12px; margin-top: 10px; }
+.lastline { color: var(--mut); font-size: 12px; margin-top: 10px; }
+
+/* ---------- History ---------- */
+.filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.sess-card {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+  padding: 12px 14px; margin-bottom: 12px;
+}
+.sess-card .sc-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.sess-card .sc-head .t { font-weight: 600; }
+.sess-card .sc-head .m { color: var(--mut); font-size: 12px; }
+.setline { font-size: 13px; padding: 6px 0; border-top: 1px dashed var(--line); display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.setline .exn { font-weight: 600; }
+.setline .sets { color: #cfd5e0; }
+.setline .nt { color: var(--mut); font-style: italic; font-size: 12px; }
+.delset {
+  background: transparent; border: 1px solid var(--line); color: var(--mut);
+  border-radius: 4px; cursor: pointer; font-size: 10px; padding: 2px 7px; flex-shrink: 0;
+}
+.delset:hover { background: var(--red); border-color: var(--red); color: #fff; }
+.empty { color: var(--mut); font-size: 13px; font-style: italic; }
+
+/* ---------- Settings ---------- */
+.set-grid { display: grid; gap: 12px; }
+.set-grid label { font-size: 12px; color: var(--mut); display: block; margin-bottom: 4px; }
+.set-grid input { width: 100%; }
+.row-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px);
+  background: #262c36; color: var(--text); border: 1px solid var(--line);
+  padding: 10px 18px; border-radius: 8px; font-size: 13px; opacity: 0;
+  transition: all 0.25s; pointer-events: none; z-index: 99; max-width: 90vw; text-align: center;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.err { border-color: var(--red); color: #fca5a5; }
+
+footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--mut); font-size: 12px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Hypertrophy &amp; Hinge Re-entry Tracker <span class="version">v4.0</span></h1>
+    <div class="subtitle">Upper/Lower &middot; Antagonist Supersets &middot; Spine-Sparing &middot; Hyper Pro Edition</div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Main tabs">
+    <button data-target="program" class="active" role="tab" aria-selected="true">Program</button>
+    <button data-target="session" role="tab" aria-selected="false">Session</button>
+    <button data-target="history" role="tab" aria-selected="false">History</button>
+    <button data-target="settings" role="tab" aria-selected="false">Settings</button>
+  </nav>
+
+  <main>
+    <section id="panel-program" class="panel active" role="tabpanel">
+      <div class="protocol" id="protocolBox"></div>
+      <nav class="daytabs" id="dayTabs" aria-label="Program days"></nav>
+      <div id="programBody"></div>
+    </section>
+
+    <section id="panel-session" class="panel" role="tabpanel">
+      <div id="sessionBody"></div>
+    </section>
+
+    <section id="panel-history" class="panel" role="tabpanel">
+      <div id="historyBody"></div>
+    </section>
+
+    <section id="panel-settings" class="panel" role="tabpanel">
+      <div id="settingsBody"></div>
+    </section>
+  </main>
+
+  <footer>Lifting Tracker v4.0 &middot; All data stays on this device &middot; Export backups regularly from History</footer>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+'use strict';
+
+/* =====================================================================
+   PROGRAM DATA — single source of truth.
+   Edit this block to change the program; logs reference exercises by
+   stable id, so renames/reorders never orphan history.
+   log.type: 'weight'    -> weight x reps          (defaultWeight optional)
+             'bodyweight'-> added weight (0 = bodyweight) x reps
+             'distance'  -> weight x meters (carries)
+             'done'      -> completion only, optional reps (recovery work)
+   ===================================================================== */
+
+const TECHNIQUE_LABELS = {
+  'rest-pause': 'Rest-Pause',
+  'myo-reps': 'Myo-Reps',
+  'mech-drop': 'Mech. Drop Set',
+  'triple-drop': 'Triple Drop',
+  'one-half': '1.5 Reps',
+  'partials': 'Len. Partials',
+  'tempo': '3s Eccentric'
+};
+
+const PROGRAM = {
+  dailyWarmup: [
+    { name: 'McGill Curl-Up', rx: '2 \u00d7 5 (10s hold)', note: 'Crisp brace, zero lumbar movement.' },
+    { name: 'Bird-Dog', rx: '2 \u00d7 8 / side (3s hold)', note: 'Drive heel back, reach arm forward, locked neutral spine.' },
+    { name: 'Starfish Side Plank', rx: '2 \u00d7 20\u201330s / side', note: 'Top leg raised. Direct isometric for QL and lateral core.' },
+    { name: 'Thoracic Rotations', rx: '2 \u00d7 8 / side', note: 'Open the upper back before pressing or pulling.' }
+  ],
+  days: {
+    day1: {
+      label: 'Day 1: Upper A', short: 'Upper A', tag: 'Bench & Pull-Ups',
+      warmup: [
+        { name: 'Band Pull-Aparts', rx: '2 \u00d7 15', note: 'Retract and pack shoulder blades to set the bench foundation.' },
+        { name: 'Scapular Pull-Ups', rx: '2 \u00d7 8', note: 'Active scapular depression from a dead hang before loaded pull-ups.' }
+      ],
+      exercises: [
+        { id: 'd1-bench', block: 'A', name: 'Barbell Bench Press', tag: 'Chest \u00b7 Standalone',
+          rx: '4 \u00d7 5\u20138 @ 2 RIR', sets: 4, rangeLo: 5, rangeHi: 8, defaultRir: 2,
+          log: { type: 'weight', step: 2.5, defaultWeight: 45 },
+          note: '<strong>Technique:</strong> Glutes tightly planted. Strict 2-second dead-stop pause 1 cm above sternum \u2014 no bounce. Safety bars set just below chest depth.' },
+        { id: 'd1-pullup', block: 'B1', name: 'Pull-Ups (Pronated)', tag: 'Back \u00b7 SS w/ B2', superset: 'B',
+          rx: '4 \u00d7 6\u20138 @ 1\u20132 RIR', sets: 4, rangeLo: 6, rangeHi: 8, defaultRir: 2,
+          log: { type: 'bodyweight', step: 2.5, defaultWeight: 0 },
+          note: 'Overhand grip from a full hang. Log <strong>added weight only</strong> (0 = bodyweight); add vest load once all sets reach the top of the range.' },
+        { id: 'd1-ohp', block: 'B2', name: '75\u00b0 Seated DB Overhead Press', tag: 'Shoulders \u00b7 SS w/ B1', superset: 'B',
+          rx: '4 \u00d7 8\u201310 @ 1\u20132 RIR', sets: 4, rangeLo: 8, rangeHi: 10, defaultRir: 2, dbCapped: true,
+          log: { type: 'weight', step: 5, defaultWeight: 30 }, tech: ['rest-pause'],
+          note: 'Ribcage and low back locked flush to the pad. <strong>Advanced:</strong> rest-pause on Set 4 (failure \u2192 rest 15s \u2192 3\u20134 more).' },
+        { id: 'd1-sealrow', block: 'C1', name: 'Chest-Supported Seal Row', tag: 'Upper Back \u00b7 SS w/ C2', superset: 'C',
+          rx: '3 \u00d7 10\u201312 @ 1 RIR', sets: 3, rangeLo: 10, rangeHi: 12, defaultRir: 1, dbCapped: true,
+          log: { type: 'weight', step: 5, defaultWeight: 35 },
+          note: 'Chest fully supported. Flare elbows 45\u00b0 to bias rhomboids/mid-traps; 2-second peak squeeze.' },
+        { id: 'd1-skull', block: 'C2', name: 'Incline DB Skullcrushers (30\u00b0)', tag: 'Triceps \u00b7 SS w/ C1', superset: 'C',
+          rx: '3 \u00d7 10\u201312 @ 1 RIR', sets: 3, rangeLo: 10, rangeHi: 12, defaultRir: 1, dbCapped: true,
+          log: { type: 'weight', step: 5, defaultWeight: 20 }, tech: ['mech-drop'],
+          note: '30\u00b0 incline keeps long-head tension. <strong>Advanced:</strong> on Set 3, mechanical drop set straight into neutral-grip incline DB presses to failure.' },
+        { id: 'd1-inclinecurl', block: 'D1', name: 'Incline DB Curls (45\u00b0)', tag: 'Biceps \u00b7 SS w/ D2', superset: 'D',
+          rx: '3 \u00d7 10\u201312 @ 1 RIR', sets: 3, rangeLo: 10, rangeHi: 12, defaultRir: 1, dbCapped: true,
+          log: { type: 'weight', step: 5, defaultWeight: 20 }, tech: ['partials'],
+          note: 'Arms hang behind the torso for maximum long-head stretch. <strong>Advanced:</strong> after failure on the final set, 3\u20134 lengthened partials in the bottom half.' },
+        { id: 'd1-lateral', block: 'D2', name: 'Bench-Braced DB Lateral Raises', tag: 'Side Delts \u00b7 SS w/ D1', superset: 'D',
+          rx: '3 \u00d7 12\u201315 @ 0\u20131 RIR', sets: 3, rangeLo: 12, rangeHi: 15, defaultRir: 1, dbCapped: true,
+          log: { type: 'weight', step: 5, defaultWeight: 15 }, tech: ['triple-drop'],
+          note: 'Torso braced against an upright bench to kill lower-back arching. <strong>Advanced:</strong> triple drop set on Set 3.' },
+        { id: 'd1-abwheel', block: 'E', name: 'Ab Wheel Rollout (From Knees)', tag: 'Core \u00b7 Anti-Extension',
+          rx: '3 \u00d7 8\u201312 @ 1 RIR', sets: 3, rangeLo: 8, rangeHi: 12, defaultRir: 1,
+          log: { type: 'weight', step: 5, defaultWeight: 0 },
+          note: 'Lock posterior pelvic tilt (glutes clenched). Roll out only as far as the core stays flat \u2014 zero lumbar sag.' }
+      ]
+    },
+    day2: {
+      label: 'Day 2: Lower A', short: 'Lower A', tag: 'Belt Squat Primary',
+      warmup: [
+        { name: 'Ankle Dorsiflexion Rocks', rx: '2 \u00d7 10 / side', note: 'Frees ankle mobility so knees track over toes.' },
+        { name: 'Kneeling Hip Flexor Stretch', rx: '1 \u00d7 30s / side', note: 'Posterior pelvic tuck; opens the anterior hips.' }
+      ],
+      exercises: [
+        { id: 'd2-beltsquat', block: 'A', name: 'Belt Squat (Hyper Pro)', tag: 'Quads \u00b7 Standalone',
+          rx: '4 \u00d7 6\u201310 @ 1 RIR', sets: 4, rangeLo: 6, rangeHi: 10, defaultRir: 1,
+          log: { type: 'weight', step: 5, defaultWeight: 90 }, tech: ['one-half'],
+          note: 'Zero axial load. 3s eccentric, 1s pause in the hole. <strong>Advanced:</strong> 1.5 reps on Sets 3\u20134 (full \u2192 half \u2192 full \u2192 lockout).' },
+        { id: 'd2-legext', block: 'B', name: 'Leg Extensions (Hyper Pro)', tag: 'Quads',
+          rx: '3 \u00d7 12\u201315 @ 0\u20131 RIR', sets: 3, rangeLo: 12, rangeHi: 15, defaultRir: 1,
+          log: { type: 'weight', step: 5, defaultWeight: 40 },
+          note: 'Done right after the belt squat to pre-exhaust before Bulgarians (equipment flow). 2s peak iso, 3s lowering.' },
+        { id: 'd2-bss', block: 'C', name: 'DB Bulgarian Split Squat', tag: 'Quads \u00b7 Unilateral',
+          rx: '3 \u00d7 8\u201312 / side @ 1\u20132 RIR', sets: 3, rangeLo: 8, rangeHi: 12, defaultRir: 2, dbCapped: true, unilateral: true,
+          log: { type: 'weight', step: 5, defaultWeight: 35 },
+          note: 'Torso tall for quad bias. DBs or vest. Loads read lower after the pre-exhaust \u2014 that is expected. <strong>Advanced:</strong> 3 bottom-half pulses after failure on Set 3.' },
+        { id: 'd2-backext', block: 'D1', name: '45\u00b0 Back Extensions (Hyper Pro)', tag: 'Glutes \u00b7 Erectors \u00b7 SS w/ D2', superset: 'D',
+          rx: '3 \u00d7 10\u201315 @ 2 RIR', sets: 3, rangeLo: 10, rangeHi: 15, defaultRir: 2,
+          log: { type: 'weight', step: 5, defaultWeight: 0 },
+          note: 'Upper thoracic rounded, toes turned out 20\u00b0. Lumbar locked in neutral isometric \u2014 all tension on the glutes.' },
+        { id: 'd2-calves', block: 'D2', name: 'DB Deficit Calf Raises', tag: 'Calves \u00b7 SS w/ D1', superset: 'D',
+          rx: '3 \u00d7 15\u201320 @ 0\u20131 RIR', sets: 3, rangeLo: 15, rangeHi: 20, defaultRir: 1, dbCapped: true,
+          log: { type: 'weight', step: 5, defaultWeight: 40 },
+          note: 'On the plyo box/step. 1 full second at the dead-stop bottom stretch \u2014 no tendon bounce.' },
+        { id: 'd2-kneetucks', block: 'E', name: 'Hanging Knee Tucks', tag: 'Core \u00b7 Decompression',
+          rx: '3 \u00d7 10\u201312 @ 1 RIR', sets: 3, rangeLo: 10, rangeHi: 12, defaultRir: 1,
+          log: { type: 'weight', step: 5, defaultWeight: 0 },
+          note: 'Active shoulder hang. Curl the belt buckle to the sternum (posterior pelvic tilt), 1s hold at top, lower without swinging.' }
+      ]
+    },
+    day3: {
+      label: 'Day 3: Upper B', short: 'Upper B', tag: 'Lat Rows & Dips',
+      warmup: [
+        { name: 'Prone Y-T-W', rx: '2 \u00d7 8 / position', note: 'Dynamic scapular control to prep the upper back.' },
+        { name: 'Ring Support Hold', rx: '2 \u00d7 15\u201320s', note: 'Elbows locked, shoulders depressed. Primes dip stability.' }
+      ],
+      exercises: [
+        { id: 'd3-latrow', block: 'A', name: 'Chest-Supported DB Lat Rows', tag: 'Lats \u00b7 Standalone',
+          rx: '4 \u00d7 8\u201310 @ 2 RIR', sets: 4, rangeLo: 8, rangeHi: 10, defaultRir: 2, dbCapped: true,
+          log: { type: 'weight', step: 5, defaultWeight: 40 }, tech: ['myo-reps'],
+          note: 'Neutral grip on a low-incline bench, elbows driven tight to the hips. <strong>Advanced:</strong> myo-reps on Set 4 (activation set \u2192 3\u00d73 mini-sets, 15s rest).' },
+        { id: 'd3-ringdip', block: 'B1', name: 'Ring Dips', tag: 'Chest/Triceps \u00b7 SS w/ B2', superset: 'B',
+          rx: '4 \u00d7 8\u201312 @ 1\u20132 RIR', sets: 4, rangeLo: 8, rangeHi: 12, defaultRir: 2,
+          log: { type: 'bodyweight', step: 2.5, defaultWeight: 0 },
+          note: 'Turn the rings out at lockout; 3s lowering on every rep. Straps are long \u2014 control the depth and stop at 1\u20132 RIR so instability never becomes grinding reps. Log added weight only (0 = bodyweight).' },
+        { id: 'd3-hammer', block: 'B2', name: 'Standing DB Hammer Curls', tag: 'Brachialis \u00b7 SS w/ B1', superset: 'B',
+          rx: '4 \u00d7 10\u201312 @ 1 RIR', sets: 4, rangeLo: 10, rangeHi: 12, defaultRir: 1, dbCapped: true,
+          log: { type: 'weight', step: 5, defaultWeight: 25 }, tech: ['rest-pause'],
+          note: 'Palms-in neutral grip \u2014 brachialis and elbow resilience. <strong>Advanced:</strong> rest-pause on Set 4.' },
+        { id: 'd3-reardelt', block: 'C1', name: 'Chest-Supported DB Rear Delt Flyes', tag: 'Rear Delts \u00b7 SS w/ C2', superset: 'C',
+          rx: '3 \u00d7 15\u201320 @ 0\u20131 RIR', sets: 3, rangeLo: 15, rangeHi: 20, defaultRir: 1, dbCapped: true,
+          log: { type: 'weight', step: 5, defaultWeight: 10 },
+          note: 'Chest down on the incline bench, lead with the pinkies.' },
+        { id: 'd3-yraise', block: 'C2', name: '30\u00b0 Incline Y-Raises', tag: 'Side Delts & Lower Traps \u00b7 SS w/ C1', superset: 'C',
+          rx: '3 \u00d7 12\u201315 @ 0\u20131 RIR', sets: 3, rangeLo: 12, rangeHi: 15, defaultRir: 1, dbCapped: true,
+          log: { type: 'weight', step: 5, defaultWeight: 5 },
+          note: 'Chest-down on the 30\u00b0 bench, raise in a Y with thumbs up.' },
+        { id: 'd3-crunch', block: 'D', name: 'Decline Thoracic Crunches (Hyper Pro)', tag: 'Core \u00b7 Shortened Rectus',
+          rx: '3 \u00d7 12\u201315 @ 1 RIR', sets: 3, rangeLo: 12, rangeHi: 15, defaultRir: 1,
+          log: { type: 'weight', step: 5, defaultWeight: 0 },
+          note: 'Unweighted. Sacrum and lumbar pinned; flex only through the thoracic spine, 1s peak squeeze. Zero hip-flexor pull.' }
+      ]
+    },
+    day4: {
+      label: 'Day 4: Lower B', short: 'Lower B', tag: 'Posterior Chain & Hinge',
+      warmup: [
+        { name: '90/90 Hip Switches', rx: '2 \u00d7 8 / side', note: 'Hip internal/external rotation for smooth hinging.' },
+        { name: 'Single-Leg Glute Bridge', rx: '2 \u00d7 8 / side (2s hold)', note: 'Wakes up glute max before the RDLs.' }
+      ],
+      exercises: [
+        { id: 'd4-rdl', block: 'A', name: 'DB B-Stance RDL (Kickstand)', tag: 'Hams/Glutes \u00b7 Standalone',
+          rx: '4 \u00d7 8\u201310 / side @ 2 RIR', sets: 4, rangeLo: 8, rangeHi: 10, defaultRir: 2, dbCapped: true, unilateral: true,
+          log: { type: 'weight', step: 5, defaultWeight: 45 },
+          note: '<strong>Form:</strong> 80/20 stance. Contralateral DB in the opposite hand. Hips drive straight back; 3s eccentric, 1s pause at the deep hamstring stretch.' },
+        { id: 'd4-hamcurl', block: 'B', name: 'Lying Hamstring Curls (Hyper Pro)', tag: 'Hamstrings \u00b7 Knee Flexion',
+          rx: '4 \u00d7 10\u201312 @ 1 RIR', sets: 4, rangeLo: 10, rangeHi: 12, defaultRir: 1,
+          log: { type: 'weight', step: 5, defaultWeight: 30 }, tech: ['myo-reps'],
+          note: 'Direct knee-flexion isolation. <strong>Advanced:</strong> myo-reps on Set 4 (activation to 1 RIR \u2192 3\u00d73 mini-sets, 15s rest).' },
+        { id: 'd4-hipthrust', block: 'C', name: 'Barbell Hip Thrust', tag: 'Glute Max',
+          rx: '3 \u00d7 8\u201312 @ 1\u20132 RIR', sets: 3, rangeLo: 8, rangeHi: 12, defaultRir: 2,
+          log: { type: 'weight', step: 5, defaultWeight: 135 },
+          note: 'Bar loaded across the hips. Drive through midfoot/heels; 2s peak posterior-tilt lockout without lumbar hyperextension.' },
+        { id: 'd4-revhyper', block: 'D', name: 'Reverse Hypers (Hyper Pro)', tag: 'Recovery \u00b7 Decompression',
+          rx: '3 \u00d7 12\u201315 (bodyweight)', sets: 3, rangeLo: 12, rangeHi: 15, defaultRir: null,
+          log: { type: 'done', step: 5, defaultWeight: 0 },
+          note: 'Bodyweight by design \u2014 decompression and erector recovery after hinging and thrusting, not a loading exercise. Just log it done.' },
+        { id: 'd4-carry', block: 'E', name: 'DB Suitcase Carries', tag: 'Core \u00b7 Anti-Lateral Finisher',
+          rx: '3 \u00d7 30\u201340m / side @ 2 RIR', sets: 3, rangeLo: 30, rangeHi: 40, defaultRir: 2, dbCapped: true, unilateral: true,
+          log: { type: 'distance', step: 5, defaultWeight: 45, defaultDistance: 35 },
+          note: 'Single heavy DB. Walk tall and upright with zero lateral lean. Alternate which hand leads first each session.' }
+      ]
+    },
+    mobility: {
+      label: 'Off-Day: Mobility', short: 'Mobility', tag: 'Hip IR & Low Back Relief', mobility: true,
+      callout: '<strong>Hip IR Protocol:</strong> If you cannot lift your ankle during RAILs, lean the torso slightly forward to open space. Maximal intent to lift stimulates new active range.',
+      items: [
+        { name: '1. Prone Hip IR Windshield Wipers', tag: 'Capsule Mobilization', rx: '2 \u00d7 10\u201312 (3s pause at bottom)', note: 'On your stomach, knees at 90\u00b0 wider than hips; let feet fall outward. Pelvis pinned flat \u2014 no lumbar twist.' },
+        { name: '2. 90/90 Hip IR PAILs / RAILs', tag: 'End-Range Isometrics', rx: '2 rounds / side (60s stretch + 10s PAILs + 10s RAILs)', note: 'Trail leg focus. PAILs: drive the rear shin down into the floor 10s. RAILs: hover/pull the rear ankle up off the floor 10s.' },
+        { name: '3. Seated Block Squeeze & Outward Ankle Hover', tag: 'Active IR Strength', rx: '2 \u00d7 8\u201310 / side (3s hold at peak)', note: 'Sit tall, foam block squeezed between the knees; swing one ankle outward without hiking the pelvis.' },
+        { name: '4. Posterior-Tilted Half-Kneeling Hip Flexor Stretch', tag: 'Anterior Chain Length', rx: '2 \u00d7 45\u201360s / side', note: 'Squeeze the rear glute hard, tuck the pelvis; shift forward only 1\u20132 inches. Low back stays flat.' },
+        { name: '5. Side-Lying Active IR Leg Lifts', tag: 'Lateral Pelvic Stability', rx: '2 \u00d7 12 / side (2s hold at top)', note: 'Top leg rotated in, toes toward the floor; lift up and slightly back \u2014 glute med in internal rotation.' },
+        { name: '6. Bird-Dog Dynamic Bracing', tag: '360 Core / Erectors', rx: '2 \u00d7 6 / side (3s hold at peak)', note: 'Heel driven straight back, arm reaching forward; neutral spine, zero lumbar hyperextension.' }
+      ]
+    }
+  }
+};
+
+const DAY_ORDER = ['day1', 'day2', 'day3', 'day4'];
+const NEXT_DAY = { day1: 'day2', day2: 'day3', day3: 'day4', day4: 'day1' };
+
+const EX = {};
+DAY_ORDER.forEach(k => PROGRAM.days[k].exercises.forEach(e => { e.dayKey = k; EX[e.id] = e; }));
+
+/* ================= storage ================= */
+
+const DB = { sessions: 'hlv4_sessions', sets: 'hlv4_sets', active: 'hlv4_active', settings: 'hlv4_settings' };
+
+function load(key, fb) {
+  try { const v = JSON.parse(localStorage.getItem(key)); return v === null || v === undefined ? fb : v; }
+  catch (e) { return fb; }
+}
+function save(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); return true; }
+  catch (e) { toast('Save failed \u2014 storage unavailable. Export a backup!', true); return false; }
+}
+const allSets = () => load(DB.sets, []);
+const allSessions = () => load(DB.sessions, []);
+
+/* ================= helpers ================= */
+
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
+let toastTimer = null;
+function toast(msg, isErr) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.toggle('err', !!isErr);
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+function localDateStr(ts) {
+  const d = ts ? new Date(ts) : new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function fmtDate(ts) { return localDateStr(ts); }
+function fmtClock(ts) { return new Date(ts).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); }
+function fmtDur(ms) {
+  const m = Math.round(ms / 60000);
+  return m >= 60 ? Math.floor(m / 60) + 'h ' + (m % 60) + 'm' : m + ' min';
+}
+
+/* ================= tabs ================= */
+
+function showPanel(id) {
+  $$('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + id));
+  $$('nav.tabs button').forEach(b => {
+    const on = b.dataset.target === id;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  if (id === 'session') renderSession();
+  if (id === 'history') renderHistory();
+  if (id === 'settings') renderSettings();
+  window.scrollTo({ top: 0 });
+}
+
+/* ================= program tab ================= */
+
+const state = { progDay: 'day1', openEx: null, sessOverride: '', histEx: '', histDay: '' };
+
+function renderProtocol() {
+  $('#protocolBox').innerHTML =
+    '<strong>Coach\u2019s Protocol</strong><ul>' +
+    '<li><strong>Daily Warm-Up:</strong> McGill Curl-Up, Bird-Dog, Starfish Side Plank, and Thoracic Rotations before every session.</li>' +
+    '<li><strong>Spine-Sparing:</strong> No standing axial loading. Hinge work stays calibrated (B-stance RDL). Core training is bracing, anti-lateral flexion, and decompression.</li>' +
+    '<li><strong>Superset Rule:</strong> Primary compounds stand alone to protect output. Accessory pairs run as antagonist supersets for density.</li>' +
+    '<li><strong>Progressive Overload:</strong> Barbell lifts micro-load +2.5 lb; DBs +5 lb. At the 45 lb DB cap: weighted vest, 3s eccentrics, 1.5 reps, lengthened partials.</li>' +
+    '<li><strong>Effort:</strong> Compounds stop 1\u20132 RIR short of failure; isolation 0\u20131 RIR. Missed reps last session \u2192 hold the weight and skip the finisher.</li>' +
+    '</ul>';
+}
+
+function renderProgram() {
+  const keys = ['day1', 'day2', 'day3', 'day4', 'mobility'];
+  $('#dayTabs').innerHTML = keys.map(k =>
+    `<button data-day="${k}" class="${state.progDay === k ? 'on' : ''}">${escapeHtml(PROGRAM.days[k].label.split(':')[0])}: ${escapeHtml(PROGRAM.days[k].short)}</button>`
+  ).join('');
+  $$('#dayTabs button').forEach(b => b.addEventListener('click', () => { state.progDay = b.dataset.day; renderProgram(); }));
+
+  const body = $('#programBody');
+  const d = PROGRAM.days[state.progDay];
+
+  if (d.mobility) {
+    body.innerHTML =
+      `<div class="day-header"><h2>${escapeHtml(d.label)}</h2><span class="day-tag">${escapeHtml(d.tag)}</span></div>` +
+      `<div class="callout">${d.callout}</div>` +
+      `<div class="section"><div class="section-title">Capsule Mobilization &amp; Neuromuscular Control</div>` +
+      d.items.map(it =>
+        `<div class="exercise"><div class="exercise-head"><span class="exercise-name">${escapeHtml(it.name)}</span>` +
+        `<span class="exercise-tag">${escapeHtml(it.tag)}</span></div>` +
+        `<div class="exercise-sets">${escapeHtml(it.rx)}</div><div class="exercise-notes">${escapeHtml(it.note)}</div></div>`
+      ).join('') + '</div>';
+    return;
+  }
+
+  const dailyCard =
+    `<div class="section"><div class="section-title">Daily Warm-Up (every session)</div>` +
+    PROGRAM.dailyWarmup.map(w =>
+      `<div class="exercise"><div class="exercise-head"><span class="exercise-name">${escapeHtml(w.name)}</span></div>` +
+      `<div class="exercise-sets">${escapeHtml(w.rx)}</div><div class="exercise-notes">${escapeHtml(w.note)}</div></div>`
+    ).join('') + '</div>';
+
+  const specificCard =
+    `<div class="section"><div class="section-title">Specific Warm-Up</div>` +
+    d.warmup.map(w =>
+      `<div class="exercise"><div class="exercise-head"><span class="exercise-name">${escapeHtml(w.name)}</span></div>` +
+      `<div class="exercise-sets">${escapeHtml(w.rx)}</div><div class="exercise-notes">${escapeHtml(w.note)}</div></div>`
+    ).join('') + '</div>';
+
+  const workCard =
+    `<div class="section"><div class="section-title">Hypertrophy &amp; Strength</div>` +
+    d.exercises.map(e =>
+      `<div class="exercise ${e.superset ? 'superset' : ''}">` +
+      `<div class="exercise-head"><span class="exercise-name">${escapeHtml(e.block)}. ${escapeHtml(e.name)}</span>` +
+      `<span class="exercise-tag">${escapeHtml(e.tag)}</span></div>` +
+      `<div class="exercise-sets">${escapeHtml(e.rx)}</div>` +
+      `<div class="exercise-notes">${e.note}</div></div>`
+    ).join('') + '</div>';
+
+  body.innerHTML =
+    `<div class="day-header"><h2>${escapeHtml(d.label)}</h2><span class="day-tag">${escapeHtml(d.tag)}</span></div>` +
+    dailyCard + specificCard + workCard;
+}
+
+/* ================= session: data ================= */
+
+function activeSession() { return load(DB.active, null); }
+
+function nextDayKey() {
+  const done = allSessions().filter(s => s.dayKey);
+  if (!done.length) return 'day1';
+  const last = [...done].sort((a, b) => b.startedAt - a.startedAt)[0];
+  return NEXT_DAY[last.dayKey] || 'day1';
+}
+
+function sessionSets(exId) {
+  const s = activeSession();
+  if (!s) return [];
+  return allSets().filter(x => x.sessionId === s.id && x.exerciseId === exId).sort((a, b) => a.ts - b.ts);
+}
+
+function lastPerf(exId) {
+  const sets = allSets().filter(s => s.exerciseId === exId);
+  if (!sets.length) return null;
+  const bySess = {};
+  sets.forEach(s => { (bySess[s.sessionId] = bySess[s.sessionId] || []).push(s); });
+  const ids = Object.keys(bySess).sort((a, b) => bySess[b][0].ts - bySess[a][0].ts);
+  const ssets = bySess[ids[0]].sort((a, b) => a.ts - b.ts);
+  const sess = allSessions().find(s => s.id === ids[0]);
+  return { date: sess ? fmtDate(sess.startedAt) : '', sets: ssets };
+}
+
+function setLabel(s) {
+  const ex = EX[s.exerciseId];
+  if (!ex) return '';
+  if (ex.log.type === 'done') return 'done' + (s.reps ? ' \u00d7' + s.reps : '');
+  if (ex.log.type === 'distance') return `${s.weight != null ? s.weight : 0}\u00d7${s.distance != null ? s.distance + 'm' : '?'}`;
+  const w = s.weight != null && s.weight !== 0 ? (ex.log.type === 'bodyweight' ? '+' + s.weight : s.weight)
+          : (ex.log.type === 'bodyweight' ? 'BW' : '0');
+  return `${w}\u00d7${s.reps != null ? s.reps : '?'}`;
+}
+
+function summaryLine(ex) {
+  const lp = lastPerf(ex.id);
+  if (!lp) return 'No history yet';
+  return `Last ${lp.date}: ` + lp.sets.map(s => {
+    const l = setLabel(s);
+    return l + (s.rir != null ? ' @' + s.rir + 'R' : '');
+  }).join(' \u00b7 ');
+}
+
+function suggestion(ex) {
+  if (ex.log.type === 'done') return '';
+  const lp = lastPerf(ex.id);
+  if (!lp) return '';
+  const repsVals = lp.sets.map(s => s.reps).filter(v => v != null);
+  if (!repsVals.length) return '';
+  if (repsVals.every(v => v >= ex.rangeHi)) {
+    if (ex.dbCapped) {
+      const w = lp.sets[lp.sets.length - 1].weight;
+      if (ex.log.type === 'bodyweight') return 'Top of range \u2014 add vest load.';
+      if (w != null && w >= 45) return 'Top of range at 45s \u2014 add vest weight or slow the eccentric.';
+      return 'Top of range \u2014 consider ' + ((w || 0) + ex.log.step) + ' lbs next.';
+    }
+    const w = lp.sets[lp.sets.length - 1].weight || 0;
+    return ex.log.type === 'distance'
+      ? 'Top of range \u2014 go heavier or longer next time.'
+      : 'Top of range \u2014 consider ' + (w + ex.log.step) + ' lbs next.';
+  }
+  if (ex.log.type !== 'distance' && repsVals.some(v => v < ex.rangeLo)) {
+    return 'Missed target reps last time \u2014 hold this weight and skip the finisher.';
+  }
+  return '';
+}
+
+/* ================= session: draft state ================= */
+
+const draft = {};
+
+function ensureDraft(ex) {
+  if (draft[ex.id]) return;
+  const lp = lastPerf(ex.id);
+  const last = lp ? lp.sets[lp.sets.length - 1] : null;
+  draft[ex.id] = {
+    weight: last && last.weight != null ? last.weight : (ex.log.defaultWeight || 0),
+    reps: last && last.reps != null ? String(last.reps) : '',
+    distance: last && last.distance != null ? last.distance : (ex.log.defaultDistance || 35),
+    rir: last && last.rir != null ? last.rir : (ex.defaultRir != null ? ex.defaultRir : 2),
+    side: ex.unilateral ? 'L' : null,
+    techniques: new Set(ex.tech || []),
+    notes: ''
+  };
+}
+
+function bumpDraft(exId, field, amt) {
+  const d = draft[exId];
+  const cur = parseFloat(d[field]);
+  const base = isNaN(cur) ? 0 : cur;
+  d[field] = Math.max(0, Math.round((base + amt) * 100) / 100);
+  syncDraftInputs(exId);
+}
+function syncDraftInputs(exId) {
+  const d = draft[exId];
+  const ex = EX[exId];
+  const map = { weight: '#in-w-', reps: '#in-r-', distance: '#in-d-' };
+  Object.keys(map).forEach(f => {
+    const el = $(map[f] + exId);
+    if (el && document.activeElement !== el) el.value = d[f];
+  });
+  if (ex && ex.log.type === 'bodyweight') { /* weight is added-weight, same input */ }
+}
+function setDraft(exId, field, val) { draft[exId][field] = val; }
+function setDraftSide(exId, side) { draft[exId].side = side; renderSession(); }
+function setDraftRir(exId, val) { draft[exId].rir = val; renderSession(); }
+function toggleTech(exId, key) {
+  const t = draft[exId].techniques;
+  t.has(key) ? t.delete(key) : t.add(key);
+  renderSession();
+}
+
+function logSet(exId) {
+  const ex = EX[exId];
+  const d = draft[exId];
+  const sess = activeSession();
+  if (!sess) { toast('No active session', true); return; }
+
+  const num = v => (v === '' || v === null || v === undefined || isNaN(parseFloat(v))) ? null : parseFloat(v);
+  const entry = {
+    id: 'set-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+    sessionId: sess.id, exerciseId: exId, ts: Date.now(),
+    side: d.side || null,
+    rir: ex.log.type === 'done' ? null : num(d.rir),
+    techniques: [...d.techniques],
+    notes: (d.notes || '').trim()
+  };
+  if (ex.log.type === 'done') {
+    entry.weight = null; entry.distance = null; entry.reps = num(d.reps);
+  } else if (ex.log.type === 'distance') {
+    entry.weight = num(d.weight); entry.distance = num(d.distance); entry.reps = null;
+  } else {
+    entry.weight = num(d.weight); entry.distance = null; entry.reps = num(d.reps);
+    if (entry.reps === null) { toast('Enter reps first', true); return; }
+  }
+
+  const sets = allSets();
+  sets.push(entry);
+  if (save(DB.sets, sets)) {
+    d.notes = '';
+    toast('Set logged \u2713');
+    renderSession();
+  }
+}
+
+/* ================= session: render ================= */
+
+function renderSession() {
+  const body = $('#sessionBody');
+  const sess = activeSession();
+
+  if (!sess) {
+    const auto = state.sessOverride || nextDayKey();
+    body.innerHTML =
+      `<div class="banner"><div class="next-line">Next up: <b>${escapeHtml(PROGRAM.days[auto].label)}</b></div>` +
+      `<div class="row-btns">` +
+      `<select class="ctl" id="dayPick">${DAY_ORDER.map(k => `<option value="${k}" ${k === auto ? 'selected' : ''}>${escapeHtml(PROGRAM.days[k].label)}</option>`).join('')}</select>` +
+      `<button class="btn primary" id="startBtn">Start Session</button></div>` +
+      `<div class="hint">Sequence follows your 2-on / 1-off rotation. Override the day if life happened. Tip: tap an exercise during a session \u2014 weight is prefilled from last time, so a set is 2\u20133 taps.</div></div>`;
+    $('#dayPick').addEventListener('change', e => { state.sessOverride = e.target.value; });
+    $('#startBtn').addEventListener('click', () => startSession($('#dayPick').value));
+    return;
+  }
+
+  const d = PROGRAM.days[sess.dayKey];
+  const setsDone = allSets().filter(x => x.sessionId === sess.id).length;
+
+  const rows = d.exercises.map(ex => {
+    const done = sessionSets(ex.id);
+    const dots = Array.from({ length: ex.sets }, (_, i) => `<span class="dot ${i < done.length ? 'on' : ''}"></span>`).join('');
+    const isOpen = state.openEx === ex.id;
+    return `<div class="exrow ${done.length >= ex.sets ? 'done-row' : ''}">` +
+      `<button class="exrow-head" data-ex="${ex.id}" aria-expanded="${isOpen}">` +
+      `<span class="r1"><span class="nm">${escapeHtml(ex.block)}. ${escapeHtml(ex.name)}</span><span class="rx">${escapeHtml(ex.rx)}</span></span>` +
+      `<span class="r2"><span class="sum">${escapeHtml(summaryLine(ex))}</span><span class="dots">${dots}</span></span>` +
+      `</button>${isOpen ? logCardHtml(ex, done.length) : ''}</div>`;
+  }).join('');
+
+  body.innerHTML =
+    `<div class="sess-head"><div><h2>${escapeHtml(d.label)}</h2><span class="meta">${fmtDate(sess.startedAt)} \u00b7 started ${fmtClock(sess.startedAt)} \u00b7 ${setsDone} sets logged</span></div>` +
+    `<button class="btn" id="finishBtn">Finish Session</button></div>` + rows;
+
+  $('#finishBtn').addEventListener('click', finishSession);
+  $$('.exrow-head').forEach(b => b.addEventListener('click', () => {
+    state.openEx = state.openEx === b.dataset.ex ? null : b.dataset.ex;
+    renderSession();
+  }));
+}
+
+function logCardHtml(ex, loggedCount) {
+  ensureDraft(ex);
+  const d = draft[ex.id];
+  const id = ex.id;
+  const t = ex.log.type;
+
+  let fields = '';
+  if (t === 'weight' || t === 'bodyweight' || t === 'distance') {
+    const wLabel = t === 'bodyweight' ? 'Added lb (0=BW)' : 'Weight (lb)';
+    fields += steppersHtml(id, 'w', wLabel, 'weight', d.weight, ex.log.step);
+  }
+  if (t === 'weight' || t === 'bodyweight' || t === 'done') {
+    fields += steppersHtml(id, 'r', t === 'done' ? 'Reps (optional)' : 'Reps', 'reps', d.reps, 1);
+  }
+  if (t === 'distance') {
+    fields += steppersHtml(id, 'd', 'Distance (m)', 'distance', d.distance, 5);
+  }
+
+  let rirRow = '';
+  if (t !== 'done' && ex.defaultRir != null) {
+    rirRow = `<div class="lcrow"><span class="fieldlbl">RIR</span><div class="chips">` +
+      [0, 1, 2, 3, 4].map(v => `<button class="chip rir ${Number(d.rir) === v ? 'on' : ''}" onclick="setDraftRir('${id}',${v})">${v}</button>`).join('') +
+      `</div></div>`;
+  }
+
+  let sideRow = '';
+  if (ex.unilateral) {
+    sideRow = `<div class="lcrow"><span class="fieldlbl">Side</span><div class="chips">` +
+      ['L', 'R'].map(s => `<button class="chip ${d.side === s ? 'on' : ''}" onclick="setDraftSide('${id}','${s}')">${s === 'L' ? 'Left' : 'Right'}</button>`).join('') +
+      `</div></div>`;
+  }
+
+  const techKeys = [...(ex.tech || []), ...Object.keys(TECHNIQUE_LABELS).filter(k => !(ex.tech || []).includes(k))];
+  const techRow = t === 'done' ? '' :
+    `<div class="lcrow"><span class="fieldlbl">Technique</span><div class="chips">` +
+    techKeys.map(k => `<button class="chip ${d.techniques.has(k) ? 'on' : ''}" onclick="toggleTech('${id}','${k}')">${TECHNIQUE_LABELS[k]}</button>`).join('') +
+    `</div></div>`;
+
+  const saveLabel = t === 'done' ? 'Mark Done' : 'Log Set';
+
+  return `<div class="logcard">` +
+    (suggestion(ex) ? `<div class="suggest">\u2191 ${escapeHtml(suggestion(ex))}</div>` : '') +
+    fields + rirRow + sideRow + techRow +
+    `<div class="lcrow"><span class="fieldlbl">Notes</span><input class="notes-in" placeholder="Optional \u2014 cue reminders, how it felt\u2026" oninput="setDraft('${id}','notes',this.value)"></div>` +
+    `<div class="lcbtns">` +
+    `<button class="btn mic" id="mic-${id}" title="Voice log" onclick="toggleMic('${id}')">\uD83C\uDF99</button>` +
+    `<button class="btn primary save" onclick="logSet('${id}')">${saveLabel} (${loggedCount}/${ex.sets})</button></div>` +
+    `<div class="vstatus" id="vs-${id}"></div>` +
+    `<div class="lastline">${escapeHtml(summaryLine(ex))}</div>` +
+    `</div>`;
+}
+
+function steppersHtml(exId, short, label, field, value, step) {
+  return `<div class="lcrow"><span class="fieldlbl">${escapeHtml(label)}</span><div class="stepper">` +
+    `<button onclick="bumpDraft('${exId}','${field}',-${step})">\u2212</button>` +
+    `<input id="in-${short}-${exId}" inputmode="decimal" value="${escapeHtml(value)}" oninput="setDraft('${exId}','${field}',this.value)">` +
+    `<button onclick="bumpDraft('${exId}','${field}',${step})">+</button>` +
+    `</div></div>`;
+}
+
+function startSession(dayKey) {
+  const s = { id: 'sess-' + Date.now(), dayKey, startedAt: Date.now(), endedAt: null };
+  const sessions = allSessions(); sessions.push(s);
+  if (!save(DB.sessions, sessions)) return;
+  save(DB.active, s);
+  state.openEx = null;
+  renderSession();
+  toast('Session started \u2014 ' + PROGRAM.days[dayKey].label);
+}
+
+function finishSession() {
+  const s = activeSession();
+  if (!s) return;
+  const n = allSets().filter(x => x.sessionId === s.id).length;
+  if (!confirm(`Finish session? (${n} sets logged)`)) return;
+  s.endedAt = Date.now();
+  save(DB.sessions, allSessions().map(x => x.id === s.id ? s : x));
+  localStorage.removeItem(DB.active);
+  state.openEx = null;
+  renderSession();
+  toast('Session finished \u2014 ' + fmtDur(s.endedAt - s.startedAt));
+}
+
+/* ================= voice ================= */
+
+const draftStatus = {};
+
+function setStatus(exId, msg) {
+  draftStatus[exId] = msg;
+  const el = $('#vs-' + exId);
+  if (el) el.textContent = msg || '';
+}
+
+let rec = null, recEx = null, recFinal = '';
+
+function toggleMic(exId) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { toast('Speech recognition not available in this browser', true); return; }
+  if (rec) { rec.stop(); return; }
+  recEx = exId; recFinal = '';
+  rec = new SR();
+  rec.lang = 'en-US';
+  rec.interimResults = true;
+  rec.continuous = false;
+  rec.onresult = e => {
+    let interim = '';
+    for (const r of e.results) {
+      if (r.isFinal) recFinal += r[0].transcript + ' ';
+      else interim += r[0].transcript;
+    }
+    setStatus(exId, '\uD83C\uDF99 ' + (recFinal + ' ' + interim).trim());
+  };
+  rec.onerror = e => { setStatus(exId, 'Voice error: ' + e.error); };
+  rec.onend = () => {
+    const ex = recEx; rec = null; recEx = null;
+    if (ex && recFinal.trim()) applyTranscript(ex, recFinal.trim());
+    else if (ex) setStatus(ex, '');
+  };
+  try { rec.start(); setStatus(exId, '\uD83C\uDF99 Listening\u2026'); }
+  catch (e) { rec = null; toast('Could not start microphone', true); }
+}
+
+const NUM_WORDS = {
+  zero: 0, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9,
+  ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16,
+  seventeen: 17, eighteen: 18, nineteen: 19, twenty: 20, thirty: 30, forty: 40, fourty: 40,
+  fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90, hundred: 100
+};
+
+function wordsToNum(t) {
+  return t.replace(/\b(zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fourty|fifty|sixty|seventy|eighty|ninety)\s+(zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen)\b/g,
+    (m, a, b) => String(NUM_WORDS[a] + NUM_WORDS[b])
+  ).replace(/\b(zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fourty|fifty|sixty|seventy|eighty|ninety|hundred)\b/g,
+    m => String(NUM_WORDS[m]));
+}
+
+function offlineParse(raw) {
+  let t = ' ' + raw.toLowerCase() + ' ';
+  t = t.replace(/r\.?\s?i\.?\s?r\.?/g, ' rir ');
+  t = t.replace(/lbs?\.?|pounds?/g, ' lb ');
+  t = wordsToNum(t);
+
+  const out = {};
+  const mw = t.match(/(\d+(?:\.\d+)?)\s*lb/); if (mw) out.weight = parseFloat(mw[1]);
+  const mr = t.match(/(\d+)\s*(?:reps?|repetitions?|times)/); if (mr) out.reps = parseInt(mr[1], 10);
+  const md = t.match(/(\d+)\s*(?:m\b|meters?|metres?)/); if (md) out.distance = parseInt(md[1], 10);
+  const mrir = t.match(/(\d+)\s*(?:rir|in reserve|reserve)/); if (mrir) out.rir = parseInt(mrir[1], 10);
+  if (out.rir == null && /failure/.test(t)) out.rir = 0;
+  if (/\bleft\b/.test(t)) out.side = 'L'; else if (/\bright\b/.test(t)) out.side = 'R';
+
+  const techs = [];
+  if (/rest\s?pause/.test(t)) techs.push('rest-pause');
+  if (/myo/.test(t)) techs.push('myo-reps');
+  if (/drop\s?set/.test(t)) techs.push('mech-drop');
+  if (/triple/.test(t)) techs.push('triple-drop');
+  if (/1\.5|one and a half|one anda half/.test(t)) techs.push('one-half');
+  if (/partial/.test(t)) techs.push('partials');
+  if (/tempo|eccentric|slow negative/.test(t)) techs.push('tempo');
+  if (techs.length) out.techniques = techs;
+
+  if (out.weight == null || out.reps == null) {
+    const nums = [...t.matchAll(/(\d+(?:\.\d+)?)/g)].map(m => parseFloat(m[1]));
+    if (out.weight == null && nums.length) out.weight = nums[0];
+    if (out.reps == null && nums.length > 1) out.reps = nums[1];
+  }
+  return out;
+}
+
+async function llmParse(text, ex, off) {
+  const st = load(DB.settings, {});
+  const ctrl = new AbortController();
+  const to = setTimeout(() => ctrl.abort(), 12000);
+  const sys = 'You extract structured data from a spoken gym-set description. Reply ONLY with minified JSON, no prose: ' +
+    '{"weight":number|null,"reps":number|null,"rir":number|null,"distance_m":number|null,"side":"L"|"R"|null,"techniques":string[],"notes":string|null}. ' +
+    'rir = reps in reserve, 0-4. techniques entries must be from: ' + Object.keys(TECHNIQUE_LABELS).join(', ') + '. ' +
+    'Context: exercise is "' + ex.name + '", prescription "' + ex.rx + '", weight unit is pounds. Put anything conversational in notes.';
+  try {
+    const res = await fetch(st.llmUrl, {
+      method: 'POST', signal: ctrl.signal,
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + st.llmKey },
+      body: JSON.stringify({
+        model: st.llmModel, temperature: 0, max_tokens: 300,
+        messages: [{ role: 'system', content: sys }, { role: 'user', content: text }]
+      })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const j = await res.json();
+    let c = (j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || '';
+    c = c.replace(/```json|```/g, '').trim();
+    const m = c.match(/\{[\s\S]*\}/);
+    if (!m) throw new Error('no JSON in reply');
+    const d = JSON.parse(m[0]);
+    return {
+      weight: d.weight != null ? d.weight : off.weight,
+      reps: d.reps != null ? d.reps : off.reps,
+      rir: d.rir != null ? d.rir : off.rir,
+      distance: d.distance_m != null ? d.distance_m : off.distance,
+      side: d.side ? (String(d.side).toUpperCase().startsWith('L') ? 'L' : 'R') : off.side,
+      techniques: (Array.isArray(d.techniques) && d.techniques.length) ? d.techniques.filter(k => TECHNIQUE_LABELS[k]) : (off.techniques || []),
+      notes: d.notes || ''
+    };
+  } finally { clearTimeout(to); }
+}
+
+function describeParsed(p) {
+  const parts = [];
+  if (p.weight != null) parts.push(p.weight + ' lb');
+  if (p.reps != null) parts.push(p.reps + ' reps');
+  if (p.distance != null) parts.push(p.distance + ' m');
+  if (p.rir != null) parts.push(p.rir + ' RIR');
+  if (p.side) parts.push(p.side === 'L' ? 'left' : 'right');
+  if (p.techniques && p.techniques.length) parts.push(p.techniques.map(k => TECHNIQUE_LABELS[k]).join(', '));
+  if (p.notes) parts.push('note: ' + p.notes);
+  return parts.join(' \u00b7 ') || 'nothing recognized \u2014 type it manually';
+}
+
+function applyParsed(exId, p) {
+  const d = draft[exId];
+  const ex = EX[exId];
+  if (p.weight != null && (ex.log.type === 'weight' || ex.log.type === 'bodyweight' || ex.log.type === 'distance')) d.weight = p.weight;
+  if (p.reps != null && ex.log.type !== 'distance') d.reps = String(p.reps);
+  if (p.distance != null && ex.log.type === 'distance') d.distance = p.distance;
+  if (p.rir != null && ex.log.type !== 'done') d.rir = p.rir;
+  if (p.side) d.side = p.side;
+  if (p.techniques) p.techniques.forEach(k => d.techniques.add(k));
+  if (p.notes) d.notes = p.notes;
+}
+
+async function applyTranscript(exId, text) {
+  const ex = EX[exId];
+  let data = offlineParse(text);
+  const st = load(DB.settings, {});
+  if (st.llmUrl && st.llmKey && st.llmModel) {
+    setStatus(exId, '\uD83C\uDF99 Refining with LLM\u2026');
+    try { data = await llmParse(text, ex, data); }
+    catch (e) { /* keep offline parse */ }
+  }
+  applyParsed(exId, data);
+  renderSession();
+  setStatus(exId, '\uD83C\uDF99 Parsed: ' + describeParsed(data) + ' \u2014 review, then Log Set.');
+}
+
+/* ================= history ================= */
+
+function renderHistory() {
+  const body = $('#historyBody');
+  const sessions = [...allSessions()].sort((a, b) => b.startedAt - a.startedAt);
+  const sets = allSets();
+  const act = activeSession();
+
+  const exOptions = '<option value="">All exercises</option>' +
+    DAY_ORDER.map(k => {
+      const dd = PROGRAM.days[k];
+      return `<optgroup label="${escapeHtml(dd.label)}">` +
+        dd.exercises.map(e => `<option value="${e.id}" ${state.histEx === e.id ? 'selected' : ''}>${escapeHtml(e.name)}</option>`).join('') +
+        '</optgroup>';
+    }).join('');
+  const dayOptions = '<option value="">All days</option>' +
+    DAY_ORDER.map(k => `<option value="${k}" ${state.histDay === k ? 'selected' : ''}>${escapeHtml(PROGRAM.days[k].label)}</option>`).join('');
+
+  const head =
+    `<div class="filters">` +
+    `<select class="ctl" id="fEx">${exOptions}</select>` +
+    `<select class="ctl" id="fDay">${dayOptions}</select>` +
+    `<button class="btn" id="exportBtn">Export JSON</button>` +
+    `</div>`;
+
+  let listHtml = '';
+  if (state.histEx) {
+    const fsets = sets.filter(s => s.exerciseId === state.histEx)
+      .sort((a, b) => b.ts - a.ts)
+      .filter(s => !state.histDay || (allSessions().find(x => x.id === s.sessionId) || {}).dayKey === state.histDay);
+    listHtml = fsets.length
+      ? fsets.map(s => setLineHtml(s, EX[s.exerciseId], true)).join('')
+      : '<p class="empty">No sets logged for this exercise yet.</p>';
+  } else {
+    const visible = sessions.filter(se => {
+      if (state.histDay && se.dayKey !== state.histDay) return false;
+      return true;
+    });
+    listHtml = visible.length ? visible.map(se => sessionCardHtml(se, sets, se.id === (act && act.id))).join('')
+      : '<p class="empty">No sessions yet. Start one from the Session tab.</p>';
+  }
+
+  body.innerHTML = head + `<div id="histList">${listHtml}</div>`;
+  $('#fEx').addEventListener('change', e => { state.histEx = e.target.value; renderHistory(); });
+  $('#fDay').addEventListener('change', e => { state.histDay = e.target.value; renderHistory(); });
+  $('#exportBtn').addEventListener('click', exportData);
+  $$('#histList .delset').forEach(b => b.addEventListener('click', () => delSet(b.dataset.set)));
+  $$('#histList .delsess').forEach(b => b.addEventListener('click', () => delSession(b.dataset.sess)));
+}
+
+function setLineHtml(s, ex, showExName) {
+  const metaBits = [];
+  if (s.rir != null) metaBits.push(s.rir + ' RIR');
+  if (s.side) metaBits.push(s.side);
+  if (s.techniques && s.techniques.length) metaBits.push(s.techniques.map(k => TECHNIQUE_LABELS[k]).join(', '));
+  const main = ex.log.type === 'done'
+    ? (s.reps != null ? s.reps + ' reps' : 'done')
+    : setLabel(s);
+  return `<div class="setline"><span>${showExName ? `<span class="exn">${escapeHtml(ex.name)}</span> \u00b7 ` : ''}` +
+    `<span class="sets">${escapeHtml(main)}</span>` +
+    (metaBits.length ? ` <span class="nt">(${escapeHtml(metaBits.join(' \u00b7 '))})</span>` : '') +
+    `${s.notes ? ` <span class="nt">${escapeHtml(s.notes)}</span>` : ''}</span>` +
+    `<button class="delset" data-set="${s.id}">del</button></div>`;
+}
+
+function sessionCardHtml(se, allSetsArr, isActive) {
+  const d = PROGRAM.days[se.dayKey];
+  const ssets = allSetsArr.filter(s => s.sessionId === se.id);
+  const byEx = {};
+  ssets.forEach(s => { (byEx[s.exerciseId] = byEx[s.exerciseId] || []).push(s); });
+
+  const groups = Object.keys(byEx).map(exId => {
+    const ex = EX[exId];
+    if (!ex) return '';
+    return byEx[exId].map(s => setLineHtml(s, ex, true)).join('');
+  }).join('');
+
+  return `<div class="sess-card"><div class="sc-head">` +
+    `<span class="t">${escapeHtml(d ? d.label : se.dayKey)}${isActive ? ' \u00b7 in progress' : ''}</span>` +
+    `<span class="m">${fmtDate(se.startedAt)} \u00b7 ${fmtClock(se.startedAt)}${se.endedAt ? ' \u2013 ' + fmtDur(se.endedAt - se.startedAt) : ''} \u00b7 ${ssets.length} sets ` +
+    `<button class="delset delsess" data-sess="${se.id}">del session</button></span></div>` +
+    (groups || '<p class="empty">No sets logged.</p>') +
+    `</div>`;
+}
+
+function delSet(setId) {
+  if (!confirm('Delete this set?')) return;
+  save(DB.sets, allSets().filter(s => s.id !== setId));
+  renderHistory();
+  toast('Set deleted');
+}
+
+function delSession(sessId) {
+  if (!confirm('Delete this whole session and its sets?')) return;
+  save(DB.sessions, allSessions().filter(s => s.id !== sessId));
+  save(DB.sets, allSets().filter(s => s.sessionId !== sessId));
+  const act = activeSession();
+  if (act && act.id === sessId) localStorage.removeItem(DB.active);
+  renderHistory();
+  toast('Session deleted');
+}
+
+function exportData() {
+  const data = {
+    app: 'hypertrophy-hinge-tracker', schema: 1,
+    exportedAt: new Date().toISOString(),
+    sessions: allSessions(), sets: allSets()
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'lifting-export-' + localDateStr() + '.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  toast('Backup downloaded');
+}
+
+function importData(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (!Array.isArray(data.sessions) || !Array.isArray(data.sets)) throw new Error('unexpected format');
+      if (!confirm(`Import ${data.sets.length} sets from ${data.sessions.length} sessions? This REPLACES current data.`)) return;
+      save(DB.sessions, data.sessions);
+      save(DB.sets, data.sets);
+      renderHistory();
+      toast('Import complete \u2713');
+    } catch (e) {
+      toast('Import failed: ' + e.message, true);
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* ================= settings ================= */
+
+function renderSettings() {
+  const st = load(DB.settings, {});
+  $('#settingsBody').innerHTML =
+    `<div class="section"><div class="section-title">Voice \u2192 LLM Parsing (optional)</div>` +
+    `<p class="hint" style="margin-top:0">The \uD83C\uDF99 mic uses your phone\u2019s built-in speech recognition (free) and an offline parser \u2014 it works with nothing configured here. Add an OpenAI-compatible endpoint below only if you want smarter parsing of messy phrases. Your key is stored on this device only, never in the app\u2019s code.</p>` +
+    `<div class="set-grid">` +
+    `<div><label for="sUrl">API endpoint (chat/completions URL)</label><input class="ctl" id="sUrl" style="width:100%" placeholder="e.g. https://api.z.ai/api/paas/v4/chat/completions" value="${escapeHtml(st.llmUrl || '')}"></div>` +
+    `<div><label for="sKey">API key</label><input class="ctl" id="sKey" type="password" style="width:100%" placeholder="sk-\u2026" value="${escapeHtml(st.llmKey || '')}"></div>` +
+    `<div><label for="sModel">Model</label><input class="ctl" id="sModel" style="width:100%" placeholder="e.g. glm-4.6" value="${escapeHtml(st.llmModel || '')}"></div>` +
+    `</div>` +
+    `<div class="row-btns" style="margin-top:12px">` +
+    `<button class="btn primary" id="saveSettings">Save</button>` +
+    `<button class="btn" id="testSettings">Test connection</button></div></div>` +
+
+    `<div class="section"><div class="section-title">Data</div>` +
+    `<div class="row-btns">` +
+    `<button class="btn" id="exportBtn2">Export JSON backup</button>` +
+    `<button class="btn" id="importBtn">Import backup</button>` +
+    `<button class="btn danger" id="wipeBtn">Erase all data</button></div>` +
+    `<input type="file" id="importFile" accept=".json,application/json" style="display:none">` +
+    `<p class="hint">Backups contain sessions and sets \u2014 not your API key. Export before switching phones or clearing browser data.</p></div>` +
+
+    `<div class="section"><div class="section-title">About</div>` +
+    `<p class="hint" style="margin-top:0">v4.0 \u2014 rebuilt as a session-first logger: start a session, tap through exercises with last-time weights prefilled, voice-log sets, and watch progression nudges. Program edits live in the PROGRAM block at the top of index.html; logs reference exercises by stable id so renames never break history.</p></div>`;
+
+  $('#saveSettings').addEventListener('click', () => {
+    save(DB.settings, {
+      llmUrl: $('#sUrl').value.trim(),
+      llmKey: $('#sKey').value.trim(),
+      llmModel: $('#sModel').value.trim()
+    });
+    toast('Settings saved \u2713');
+  });
+  $('#testSettings').addEventListener('click', async () => {
+    const url = $('#sUrl').value.trim(), key = $('#sKey').value.trim(), model = $('#sModel').value.trim();
+    if (!url || !key) { toast('Enter endpoint and key first', true); return; }
+    toast('Testing\u2026');
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+        body: JSON.stringify({ model: model || 'glm-4.6', max_tokens: 10, messages: [{ role: 'user', content: 'Reply with OK' }] })
+      });
+      toast(res.ok ? 'LLM connection OK \u2713' : 'Failed: HTTP ' + res.status, !res.ok);
+    } catch (e) { toast('Failed: ' + e.message, true); }
+  });
+  $('#exportBtn2').addEventListener('click', exportData);
+  $('#importBtn').addEventListener('click', () => $('#importFile').click());
+  $('#importFile').addEventListener('change', e => { if (e.target.files[0]) importData(e.target.files[0]); e.target.value = ''; });
+  $('#wipeBtn').addEventListener('click', () => {
+    if (!confirm('Erase ALL sessions and sets? This cannot be undone.')) return;
+    if (!confirm('Really erase everything? Consider exporting a backup first.')) return;
+    [DB.sessions, DB.sets, DB.active].forEach(k => localStorage.removeItem(k));
+    renderHistory();
+    toast('All data erased');
+  });
+}
+
+/* ================= init ================= */
+
+$$('nav.tabs button').forEach(b => b.addEventListener('click', () => showPanel(b.dataset.target)));
+renderProtocol();
+renderProgram();
+renderSession();
+renderHistory();
+renderSettings();
+</script>
+</body>
+</html>

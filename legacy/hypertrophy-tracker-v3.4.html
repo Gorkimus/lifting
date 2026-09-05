@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hypertrophy & Hinge Re-entry Tracker v3.4</title>
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background: #0f1216;
+  color: #e6e9ef;
+  line-height: 1.5;
+  font-size: 15px;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px 80px;
+}
+
+header {
+  border-bottom: 1px solid #2a3038;
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: 22px;
+  margin: 0 0 4px;
+  font-weight: 700;
+}
+
+h1 .version {
+  background: #4f8cff;
+  color: #ffffff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  vertical-align: middle;
+  margin-left: 8px;
+  font-weight: 600;
+}
+
+.subtitle {
+  color: #9aa3b2;
+  font-size: 13px;
+}
+
+.changelog {
+  background: rgba(79, 140, 255, 0.08);
+  border-left: 3px solid #4f8cff;
+  padding: 12px 16px;
+  margin: 16px 0;
+  font-size: 13px;
+  border-radius: 4px;
+  color: #cfd5e0;
+}
+
+.changelog strong {
+  color: #4f8cff;
+}
+
+.protocol {
+  background: #181c22;
+  border: 1px solid #2a3038;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin: 16px 0;
+  font-size: 13px;
+  color: #cfd5e0;
+}
+
+.protocol strong {
+  color: #fbbf24;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 1px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.protocol ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.protocol li {
+  margin-bottom: 8px;
+}
+
+nav.tabs {
+  display: flex;
+  overflow-x: auto;
+  gap: 6px;
+  margin: 16px 0 24px;
+  padding: 6px;
+  background: #181c22;
+  border-radius: 8px;
+  border: 1px solid #2a3038;
+  -webkit-overflow-scrolling: touch;
+}
+
+nav.tabs button {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #9aa3b2;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.15s;
+  white-space: nowrap;
+  flex: 1 0 auto;
+}
+
+nav.tabs button:hover {
+  background: #1f242c;
+  color: #e6e9ef;
+}
+
+nav.tabs button.active {
+  background: #4f8cff;
+  border-color: #4f8cff;
+  color: #ffffff;
+}
+
+.day {
+  display: none;
+}
+
+.day.active {
+  display: block;
+}
+
+.day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #2a3038;
+}
+
+.day-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.day-tag {
+  font-size: 11px;
+  color: #9aa3b2;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: #1f242c;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+.section {
+  background: #181c22;
+  border: 1px solid #2a3038;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  margin: 0 0 12px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #4f8cff;
+  font-weight: 600;
+}
+
+.exercise {
+  border: 1px solid #2a3038;
+  border-radius: 6px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  background: #1f242c;
+}
+
+.exercise.superset {
+  border-left: 3px solid #8b5cf6;
+}
+
+.exercise:last-child {
+  margin-bottom: 0;
+}
+
+.exercise-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.exercise-name {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.exercise-tag {
+  font-size: 10px;
+  color: #9aa3b2;
+  background: #181c22;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.exercise-sets {
+  font-size: 13px;
+  color: #34d399;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.exercise-notes {
+  font-size: 13px;
+  color: #9aa3b2;
+  font-style: italic;
+}
+
+.callout {
+  background: rgba(139, 92, 246, 0.1);
+  border-left: 3px solid #8b5cf6;
+  padding: 8px 12px;
+  margin: 8px 0 16px;
+  font-size: 13px;
+  border-radius: 4px;
+  color: #cfd5e0;
+}
+
+.callout strong {
+  color: #8b5cf6;
+}
+
+.nav-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 24px;
+  gap: 8px;
+}
+
+.nav-buttons button {
+  background: #181c22;
+  border: 1px solid #2a3038;
+  color: #e6e9ef;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.15s;
+}
+
+.nav-buttons button:hover {
+  background: #1f242c;
+}
+
+.nav-buttons button.spacer {
+  visibility: hidden;
+}
+
+form.log-form {
+  background: #181c22;
+  border: 1px solid #2a3038;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 24px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-group label {
+  font-size: 12px;
+  color: #9aa3b2;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  background: #1f242c;
+  border: 1px solid #2a3038;
+  color: #e6e9ef;
+  padding: 8px 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #4f8cff;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.form-buttons button {
+  background: #4f8cff;
+  border: none;
+  color: #ffffff;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.form-buttons button.secondary {
+  background: #1f242c;
+  border: 1px solid #2a3038;
+  color: #e6e9ef;
+}
+
+.entries {
+  margin-top: 24px;
+}
+
+.entry {
+  background: #1f242c;
+  border: 1px solid #2a3038;
+  border-left: 3px solid #34d399;
+  border-radius: 6px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.entry-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.entry-exercise {
+  font-weight: 600;
+  color: #e6e9ef;
+}
+
+.entry-meta {
+  color: #9aa3b2;
+  font-size: 12px;
+}
+
+.entry-notes {
+  color: #cfd5e0;
+  font-style: italic;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed #2a3038;
+}
+
+.entry-delete {
+  background: transparent;
+  border: 1px solid #2a3038;
+  color: #9aa3b2;
+  padding: 2px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  margin-left: 8px;
+  transition: all 0.15s;
+}
+
+.entry-delete:hover {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: #ffffff;
+}
+
+footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid #2a3038;
+  color: #9aa3b2;
+  font-size: 12px;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .day-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  nav.tabs button {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Hypertrophy &amp; Hinge Re-entry Tracker <span class="version">v3.4</span></h1>
+    <div class="subtitle">Antagonist Supersets - Hyper Pro &amp; Vest Optimization - Zero Axial Spine Sparing</div>
+  </header>
+
+  <div class="changelog">
+    <strong>v3.4 Biomechanical Refinement &amp; Dynamic Log Release:</strong> Replaced Pallof press with Hanging Ring/Bar Knee Tucks; upgraded Sit-ups to Spine-Safe Decline Thoracic Crunches; added Bench-Braced Lateral Raises, Hammer Curls, Chest-Supported Y-Raises, and reordered Suitcase Carries to the finisher; converted workout logger to a dynamically synced exercise dropdown.
+  </div>
+
+  <div class="protocol">
+    <strong>Coach's Protocol &amp; Core Integrity</strong>
+    <ul>
+      <li><strong>Daily Warm-Up:</strong> McGill Curl-Up (2x5 w/ 10s hold), Bird-Dog (2x8 / side), and Thoracic Rotations (2x8 / side) prior to every session.</li>
+      <li><strong>Spinal Neutrality &amp; Anti-Movement:</strong> Zero dynamic lumbar flexion/rotation under axial load. Core training targets 360-degree bracing and decompression.</li>
+      <li><strong>The Superset Rule:</strong> Primary compound lifts are standalone to preserve CNS output. Accessory pairings (B1/B2, C1/C2) use antagonist supersets to maximize training density.</li>
+      <li><strong>Progressive Overload:</strong> When maxing dumbbells at 45 lbs, overload via 3-second eccentrics, 1.5 reps, weighted vests, and lengthened partials.</li>
+      <li>Stop standalone compounds 1-2 RIR prior to muscular failure. Isolation accessory work is taken to 0-1 RIR.</li>
+    </ul>
+  </div>
+
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Workout Program Tabs">
+    <button data-target="day1" class="active" role="tab" aria-selected="true" aria-controls="day1" id="tab-day1">Day 1: Upper A</button>
+    <button data-target="day2" role="tab" aria-selected="false" aria-controls="day2" id="tab-day2">Day 2: Lower A</button>
+    <button data-target="day3" role="tab" aria-selected="false" aria-controls="day3" id="tab-day3">Day 3: Upper B</button>
+    <button data-target="day4" role="tab" aria-selected="false" aria-controls="day4" id="tab-day4">Day 4: Lower B</button>
+    <button data-target="mobility" role="tab" aria-selected="false" aria-controls="mobility" id="tab-mobility">Off-Day: Mobility</button>
+    <button data-target="log" role="tab" aria-selected="false" aria-controls="log" id="tab-log">Log</button>
+  </nav>
+
+  <!-- DAY 1 -->
+  <div id="day1" class="day active" role="tabpanel" aria-labelledby="tab-day1">
+    <div class="day-header">
+      <h2>Day 1: Upper A (Strength &amp; Arms)</h2>
+      <span class="day-tag">Bench &amp; Pull-Ups</span>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Specific Warm-Up</div>
+      <div class="exercise">
+        <div class="exercise-head"><span class="exercise-name">Band Pull-Aparts</span><span class="exercise-tag">Specific</span></div>
+        <div class="exercise-sets">2 Sets x 15 Reps</div>
+        <div class="exercise-notes">Retract and pack shoulder blades to establish a stable bench press foundation.</div>
+      </div>
+      <div class="exercise">
+        <div class="exercise-head"><span class="exercise-name">Scapular Pull-Ups</span><span class="exercise-tag">Specific</span></div>
+        <div class="exercise-sets">2 Sets x 8 Reps</div>
+        <div class="exercise-notes">Isolate active scapular depression from a dead hang before loaded pull-ups.</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Hypertrophy &amp; Strength</div>
+      <div class="exercise">
+        <div class="exercise-head">
+          <span class="exercise-name">A. Barbell Bench Press</span>
+          <span class="exercise-tag">Chest / Standalone</span>
+        </div>
+        <div class="exercise-sets">4 Sets x 5-8 Reps @ 2 RIR</div>
+        <div class="exercise-notes"><strong>Technique:</strong> Glutes tightly planted on the bench. Execute a strict 2-second dead-stop pause 1 cm above sternum to eliminate bounce and protect shoulder capsule.</div>
+      </div>
+
+      <div class="exercise superset">
+        <div class="exercise-head">
+          <span class="exercise-name">B1. Ring / Neutral-Grip Pull-Ups</span>
+          <span class="exercise-tag">Back / Superset</span>
+        </div>
+        <div class="exercise-sets">4 Sets x 6-8 Reps @ 1-2 RIR</div>
+        <div class="exercise-notes">Rotate wrists naturally into supination at peak. Add weighted vest as strength progresses. Superset with B2.</div>
+      </div>
+      <div class="exercise superset">
+        <div class="exercise-head">
+          <span class="exercise-name">B2. 75-Degree Seated DB Overhead Press</span>
+          <span class="exercise-tag">Shoulders / Superset</span>
+        </div>
+        <div class="exercise-sets">4 Sets x 8-10 Reps @ 1-2 RIR</div>
+        <div class="exercise-notes">Set bench to 75 degrees; keep ribcage and lower back locked flush to pad. <strong>Advanced:</strong> On Set 4, perform a Rest-Pause finish (hit failure, rest 15s, push 3-4 extra reps). Superset with B1.</div>
+      </div>
+
+      <div class="exercise superset">
+        <div class="exercise-head">
+          <span class="exercise-name">C1. Chest-Supported Barbell / DB Seal Row</span>
+          <span class="exercise-tag">Upper Back / Superset</span>
+        </div>
+        <div class="exercise-sets">3 Sets x 10-12 Reps @ 1 RIR</div>
+        <div class="exercise-notes">Chest fully supported. Flare elbows 45 degrees to bias rhomboids/mid-traps with a 2-second peak squeeze. Superset with C2.</div>
+      </div>
+      <div class="exercise superset">
+        <div class="exercise-head">
+          <span class="exercise-name">C2. Incline DB Skullcrushers (30-Degree Incline)</span>
+          <span class="exercise-tag">Triceps / Superset</span>
+        </div>
+        <div class="exercise-sets">3 Sets x 10-12 Reps @ 1 RIR</div>
+        <div class="exercise-notes">30-degree incline keeps continuous long-head tension. <strong>Advanced:</strong> On Set 3, perform a Mechanical Drop Set directly into neutral-grip incline DB chest presses to failure. Superset with C1.</div>
+      </div>
+
+      <div class="exercise superset">
+        <div class="exercise-head">
+          <span class="exercise-name">D1. Incline DB Curls (45-Degree Incline)</span>
+          <span class="exercise-tag">Biceps / Superset</span>
+        </div>
+        <div class="exercise-sets">3 Sets x 10-12 Reps @ 1 RIR</div>
+        <div class="exercise-notes">Arms hang behind torso for maximum long-head stretch. <strong>Advanced:</strong> On final set, perform 3-4 lengthened partial reps in the bottom half after full failure. Superset with D2.</div>
+      </div>
+      <div class="exercise superset">
+        <div class="exercise-head">
+          <span class="exercise-name">D2. Bench-Braced DB Lateral Raises</span>
+          <span class="exercise-tag">Side Delts / Superset</span>
+        </div>
+        <div class="exercise-sets">3 Sets x 12-15 Reps @ 0-1 RIR</div>
+        <div class="exercise-notes">Stand with torso braced against upright vertical bench to eliminate lower back arching. <strong>Advanced:</strong> On Set 3, perform a Triple Drop Set (drop weight twice to failure). Superset with D1.</div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head">
+          <span class="exercise-name">E. Ab Wheel Rollout (From Knees)</span>
+          <span class="exercise-tag">Core (Anti-Extension)</span>
+        </div>
+        <div class="exercise-sets">3 Sets x 8-12 Reps @ 1 RIR</div>
+        <div class="exercise-notes">Lock posterior pelvic tilt (glutes clenched). Roll out only as far as core remains flat with zero lumbar sagging.</div>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="spacer">&larr; Previous</button>
+      <button type="button" data-nav="day2">Next: Day 2 &rarr;</button>
+    </div>
+  </div>
+
+  <!-- DAY 2 -->
+  <div id="day2" class="day" role="tabpanel" aria-labelledby="tab-day2">
+    <div class="day-header">
+      <h2>Day 2: Lower A (Quad Bias &amp; Knee Health)</h2>
+      <span class="day-tag">Belt Squat Primary</span>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Specific Warm-Up</div>
+      <div class="exercise">
+        <div class="exercise-head"><span class="exercise-name">Ankle Dorsiflexion Rocks</span><span class="exercise-tag">Specific</span></div>
+        <div class="exercise-sets">2 Sets x 10 Reps / side</div>
+        <div class="exercise-notes">Frees ankle mobility so knees track smoothly over toes during squats.</div>
+      </div>
+      <div class="exercise">
+        <div class="exercise-head"><span class="exercise-name">Kneeling Hip Flexor Stretch</span><span class="exercise-tag">Specific</span></div>
+        <div class="exercise-sets">1 Set x 30s / side</div>
+        <div class="exercise-notes">Posterior pelvic tuck; opens anterior hips before unilateral split squats.</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Hypertrophy &amp; Strength</div>
+      <div class="exercise">
+        <div class="exercise-head">
+          <span class="exercise-name">A. Belt Squat (Hyper Pro)</span>
+          <span class="exercise-tag">Quads / Standalone</span>
+        </div>
+        <div class="exercise-sets">4 Sets x 6-10 Reps @ 1 RIR</div>
+        <div class="exercise-notes">Zero axial load. 3s eccentric down, 1s pause in the hole. <strong>Advanced:</strong> On Sets 3 and 4, execute 1.5 Reps (descend full, drive halfway up, descend full, lockout).</div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head">
+          <span class="exercise-name">B. DB Bulgarian Split Squat</span>
+          <span class="exercise-tag">Quads / Unilateral</span>
+        </div>
+        <div class="exercise-sets">3 Sets x 8-12 Reps / side @ 1-2 RIR</div>
+        <div class="exercise-notes">Hold dumbbells or wear weighted vest. Keep torso tall for quad bias. <strong>Advanced:</strong> On Set 3, complete 3 bottom-half partial pulses after hitting full-range failure.</div>
+      </div>
+
+      <div class="exercise superset">
+        <div class="exercise-head">
+          <span class="exercise-name">C1. Leg Extensions (Hyper Pro Leg Developer)</span>
+          <span class="exercise-tag">Quads / Superset</span>
+        </div>
+        <div class="exercise-sets">3 Sets x 12-15 Reps @ 0-1 RIR</div>
+        <div class="exercise-notes">Hold a hard 2-second isometric contraction at peak extension, then a 3-second lowering phase. Superset with C2.</div>
+      </div>
+      <div class="exercise superset">
+        <div class="exercise-head">
+          <span class="exercise-name">C2. DB Deficit Calf Raises (on Plyo Box / Step)</span>
+          <span class="exercise-tag">Calves / Superset</span>
+        </div>
+        <div class="exercise-sets">3 Sets x 15-20 Reps @ 0-1 RIR</div>
+        <div class="exercise-notes">Hold dumbbells. Pause 1 full second at dead-stop bottom stretch to eliminate tendon bounce. Superset with C1.</div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head">
+          <span class="exercise-name">D. 45-Degree Back Extensions (Hyper Pro)</span>
+          <span class="exercise-tag">Glutes / Erectors</span>
+        </div>
+        <div class="exercise-sets">3 Sets x 10-15 Reps @ 2 RIR</div>
+        <div class="exercise-notes">Upper thoracic rounded, toes turned out 20 degrees. Locks lumbar into neutral isometric hold to shift 100% of tension to glutes.</div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head">
+          <span class="exercise-name">E. Hanging Ring / Bar Knee Tucks</span>
+          <span class="exercise-tag">Core (Spinal Decompression &amp; Flexion)</span>
+        </div>
+        <div class="exercise-sets">3 Sets x 10-12 Reps @ 1 RIR</div>
+        <div class="exercise-notes">Active shoulder hang. Initiate by curling the belt buckle up toward sternum (posterior pelvic tilt). Hold 1s at top, lower slowly without swinging.</div>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button type="button" data-nav="day1">&larr; Previous: Day 1</button>
+      <button type="button" data-nav="day3">Next: Day 3 &rarr;</button>
+    </div>
+  </div>
+
+  <!-- DAY 3 -->
+  <div id="day3" class="day" role="tabpanel" aria-labelledby="tab-day3">
+    <div class="day-header">
+      <h2>Day 3: Upper B (Hypertrophy &amp; Rings)</h2>
+      <span class="day-tag">Lat Rows &amp; Dips</span>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Specific Warm-Up</div>
+      <div class="exercise">
+        <div class="exercise-head"><span class="exercise-name">Prone Y-T-W</span><span class="exercise-tag">Specific</span></div>
+        <div class="exercise-sets">2 Sets x 8 Reps / position</div>
+        <div class="exercise-notes">Dynamic scapular control to prep the upper back for pulling.</div>
+      </div>
+      <div class="exercise">
+        <div class="exercise-head"><span class="exercise-name">Ring Support Hold</span><span class="exercise-tag">Specific</span></div>
+        <div class="exercise-sets">2 Sets x 15-20 Seconds</div>
+        <div class="exercise-notes">Elbows locked, shoulders depressed. Primes CNS for dip stability.</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Hypertrophy &amp; Strength</div>
+      <div class="exercise">
+        <div class="exercise-head">
+          <span class="exercise-name">A. Chest-Supported DB Lat Rows</span>
+          <span class="exercise-tag">Lats / Standalone</span>
+        </div>
+        <div class="exercise-sets">4 Sets x 8-10 Reps @ 2 RIR</div>
+        <div class="exercise-notes">Neutral grip on low-incline bench. Drive elbows tight to hips to isolate lats with zero spinal loading. <strong>Advanced:</strong> On Set 4, perform Myo-Reps (activation set + 3x3 mini-sets w/ 15s rest).</div>
+      </div>
+
+      <div class="exercise superset">
+        <div class="exercise-head">
+          <span class="exercise-name">B1. Ring Dips</span>
+          <span class="exercise-tag">Chest/Triceps / Superset</span>
+        </div>
+        <div class="exercise-sets">4 Sets x 8-12 Reps @ 1-2 RIR</div>
+        <div class="exercise-notes">Turn rings out at top of lockout. Strict 3-second lowering eccentric on every rep. (Sub parallel bar dips or neutral DB press if shoulder fatigue arises). Superset with B2.</div>
+      </div>
+      <div class="exercise superset">
+        <div class="exercise-head">
+          <span class="exercise-name">B2. Standing DB Hammer Curls</span>
+          <span class="exercise-tag">Brachialis &amp; Forearms / Superset</span>
+        </div>
+        <div class="exercise-sets">4 Sets x 10-12 Reps @ 1 RIR</div>
+        <div class="exercise-notes">Neutral palms-in grip. Builds brachialis and elbow joint resilience. <strong>Advanced:</strong> On Set 4, perform a Rest-Pause finish (failure, rest 15s, push 3-4 extra reps). Superset with B1.</div>
+      </div>
+
+      <div class="exercise superset">
+        <div class="exercise-head">
+          <span class="exercise-name">C1. Chest-Supported DB Rear Delt Flyes</span>
+          <span class="exercise-tag">Rear Delts / Superset</span>
+        </div>
+        <div class="exercise-sets">3 Sets x 15-20 Reps @ 0-1 RIR</div>
+        <div class="exercise-notes">Chest supported on incline bench. Lead with pinkies flared outward. Superset with C2.</div>
+      </div>
+      <div class="exercise superset">
+        <div class="exercise-head">
+          <span class="exercise-name">C2. 30-Degree Incline Chest-Supported DB Y-Raises</span>
+          <span class="exercise-tag">Side Delts &amp; Lower Traps / Superset</span>
+        </div>
+        <div class="exercise-sets">3 Sets x 12-15 Reps @ 0-1 RIR</div>
+        <div class="exercise-notes">Lie chest-down on 30-degree bench. Raise DBs in a 'Y' shape with thumbs pointing up to target lateral delts and lower traps. Superset with C1.</div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head">
+          <span class="exercise-name">D. Decline Thoracic Crunches (Hyper Pro)</span>
+          <span class="exercise-tag">Core (Shortened Rectus Abdominis)</span>
+        </div>
+        <div class="exercise-sets">3 Sets x 12-15 Reps @ 1 RIR</div>
+        <div class="exercise-notes">Unweighted. Sacrum and lumbar remain pinned to pad. Flex only through thoracic spine to roll ribs to pelvis with a 1-second peak squeeze. Zero hip flexor pull.</div>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button type="button" data-nav="day2">&larr; Previous: Day 2</button>
+      <button type="button" data-nav="day4">Next: Day 4 &rarr;</button>
+    </div>
+  </div>
+
+  <!-- DAY 4 -->
+  <div id="day4" class="day" role="tabpanel" aria-labelledby="tab-day4">
+    <div class="day-header">
+      <h2>Day 4: Lower B (Posterior Chain &amp; Hinge Re-Entry)</h2>
+      <span class="day-tag">Hinge Calibration</span>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Specific Warm-Up</div>
+      <div class="exercise">
+        <div class="exercise-head"><span class="exercise-name">90/90 Hip Switches</span><span class="exercise-tag">Specific</span></div>
+        <div class="exercise-sets">2 Sets x 8 Reps / side</div>
+        <div class="exercise-notes">Internal and external hip rotation mobility for smooth hinging mechanics.</div>
+      </div>
+      <div class="exercise">
+        <div class="exercise-head"><span class="exercise-name">Single-Leg Glute Bridge</span><span class="exercise-tag">Specific</span></div>
+        <div class="exercise-sets">2 Sets x 8 Reps / side</div>
+        <div class="exercise-notes">Hold 2 seconds at peak contraction to wake up glute max before RDLs.</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Hypertrophy &amp; Strength</div>
+      <div class="exercise">
+        <div class="exercise-head">
+          <span class="exercise-name">A. DB B-Stance RDL (Kickstand)</span>
+          <span class="exercise-tag">Hamstrings/Glutes / Standalone</span>
+        </div>
+        <div class="exercise-sets">4 Sets x 8-10 Reps / side @ 2 RIR</div>
+        <div class="exercise-notes"><strong>Form:</strong> 80/20 balance on front foot. Contralateral single 45 lb DB in opposite hand. Push hips directly backward; 3s eccentric down, 1s pause at deep hamstring stretch.</div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head">
+          <span class="exercise-name">B. Lying Hamstring Curls (Hyper Pro Leg Developer)</span>
+          <span class="exercise-tag">Hamstrings / Knee Flexion</span>
+        </div>
+        <div class="exercise-sets">4 Sets x 10-12 Reps @ 1 RIR</div>
+        <div class="exercise-notes">Direct knee-flexion isolation. <strong>Advanced:</strong> On Set 4, perform Myo-Reps (activation set to 1 RIR + 3 mini-sets of 3 reps with 15s rest).</div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head">
+          <span class="exercise-name">C. Barbell Hip Thrusts (Hyper Pro Bench Mode)</span>
+          <span class="exercise-tag">Glute Max</span>
+        </div>
+        <div class="exercise-sets">3 Sets x 8-12 Reps @ 1-2 RIR</div>
+        <div class="exercise-notes">Loaded barbell across hips. Drive through midfoot/heels, hold peak posterior pelvic tilt lockout for 2 full seconds without hyperextending lumbar.</div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head">
+          <span class="exercise-name">D. Reverse Hypers (Hyper Pro)</span>
+          <span class="exercise-tag">Decompression &amp; Erector Recovery</span>
+        </div>
+        <div class="exercise-sets">3 Sets x 12-15 Reps @ 2 RIR</div>
+        <div class="exercise-notes">Active recovery and decompression for the lower back after hinging and thrusting.</div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head">
+          <span class="exercise-name">E. DB Suitcase Carries</span>
+          <span class="exercise-tag">Core (Anti-Lateral Flexion / QL Finisher)</span>
+        </div>
+        <div class="exercise-sets">3 Sets x 30-40m / side @ 2 RIR</div>
+        <div class="exercise-notes">Single 45 lb DB. Walk tall and upright with zero lateral lean to fortify lateral pelvic stability and QL strength.</div>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button type="button" data-nav="day3">&larr; Previous: Day 3</button>
+      <button type="button" data-nav="mobility">Next: Mobility &rarr;</button>
+    </div>
+  </div>
+
+  <!-- OFF-DAY MOBILITY -->
+  <div id="mobility" class="day" role="tabpanel" aria-labelledby="tab-mobility">
+    <div class="day-header">
+      <h2>Off-Day: Hip IR &amp; Low Back Relief</h2>
+      <span class="day-tag">Capsule Mobility &amp; Control</span>
+    </div>
+
+    <div class="callout">
+      <strong>Hip IR Protocol:</strong> If you cannot lift your ankle during RAILs, lean your torso slightly forward to open space. Maximal intent to lift stimulates new active range of motion!
+    </div>
+
+    <div class="section">
+      <div class="section-title">Capsule Mobilization &amp; Neuromuscular Control</div>
+      
+      <div class="exercise">
+        <div class="exercise-head">
+          <span class="exercise-name">1. Prone Hip IR Windshield Wipers</span>
+          <span class="exercise-tag">Capsule Mobilization</span>
+        </div>
+        <div class="exercise-sets">2 Sets x 10-12 Reps (3s pause at bottom)</div>
+        <div class="exercise-notes">Lie on stomach, knees at 90 degrees wider than hips. Let feet fall outward away from each other. Pins pelvis flat to prevent lumbar twist.</div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head">
+          <span class="exercise-name">2. 90/90 Hip IR PAILs / RAILs</span>
+          <span class="exercise-tag">End-Range Isometrics</span>
+        </div>
+        <div class="exercise-sets">2 Rounds / side (60s stretch + 10s PAILs + 10s RAILs)</div>
+        <div class="exercise-notes">Focus on trail leg. Hold 60s stretch. PAILs: Drive rear ankle/shin down into floor for 10s. RAILs: Try to hover/pull rear ankle up off floor for 10s with outer hip muscles.</div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head">
+          <span class="exercise-name">3. Seated Block Squeeze &amp; Outward Ankle Hover</span>
+          <span class="exercise-tag">Active IR Strength</span>
+        </div>
+        <div class="exercise-sets">2 Sets x 8-10 Reps / side (3s hold at peak)</div>
+        <div class="exercise-notes">Sit tall on bench, squeeze a foam block between knees. Actively swing one ankle outward without hiking pelvis.</div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head">
+          <span class="exercise-name">4. Posterior-Tilted Half-Kneeling Hip Flexor Stretch</span>
+          <span class="exercise-tag">Anterior Chain Length</span>
+        </div>
+        <div class="exercise-sets">2 Sets x 45-60 Seconds / side</div>
+        <div class="exercise-notes">Squeeze rear glute hard and tuck pelvis underneath. Shift forward only 1-2 inches. Keeps lower back flat.</div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head">
+          <span class="exercise-name">5. Side-Lying Active IR Leg Lifts</span>
+          <span class="exercise-tag">Lateral Pelvic Stability</span>
+        </div>
+        <div class="exercise-sets">2 Sets x 12 Reps / side (2s hold at top)</div>
+        <div class="exercise-notes">Lie on side, rotate top leg inward with toes pointing toward floor. Lift leg up and slightly back. Fires glute medius in internal rotation.</div>
+      </div>
+
+      <div class="exercise">
+        <div class="exercise-head">
+          <span class="exercise-name">6. Bird-Dog Dynamic Bracing</span>
+          <span class="exercise-tag">360 Core / Erectors</span>
+        </div>
+        <div class="exercise-sets">2 Sets x 6 Reps / side (3s hold at peak)</div>
+        <div class="exercise-notes">Drive heel straight back and reach arm forward. Lock neutral spine with zero lumbar hyperextension.</div>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button type="button" data-nav="day4">&larr; Previous: Day 4</button>
+      <button type="button" data-nav="log">Next: Progress Log &rarr;</button>
+    </div>
+  </div>
+
+  <!-- LOG -->
+  <div id="log" class="day" role="tabpanel" aria-labelledby="tab-log">
+    <div class="day-header">
+      <h2>Workout Tracker</h2>
+      <span class="day-tag">Local Storage Persistent</span>
+    </div>
+
+    <form class="log-form" id="logForm">
+      <div class="section-title">Log New Exercise Set</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="entryDay">Training Day</label>
+          <select id="entryDay" required>
+            <option value="day1">Day 1: Upper A</option>
+            <option value="day2">Day 2: Lower A</option>
+            <option value="day3">Day 3: Upper B</option>
+            <option value="day4">Day 4: Lower B</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="entryExercise">Exercise Selection</label>
+          <select id="entryExercise" required>
+            <!-- Populated dynamically by JavaScript -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="entryWeight">Weight (lbs)</label>
+          <input type="number" id="entryWeight" min="0" step="0.5" placeholder="0 for BW">
+        </div>
+        <div class="form-group">
+          <label for="entryReps">Reps / Distance</label>
+          <input type="text" id="entryReps" placeholder="e.g., 8 reps or 35m">
+        </div>
+        <div class="form-group">
+          <label for="entryRIR">RIR / Intensity</label>
+          <select id="entryRIR">
+            <option value="0">0 RIR (Failure)</option>
+            <option value="1">1 RIR</option>
+            <option value="2" selected>2 RIR</option>
+            <option value="3">3 RIR</option>
+            <option value="4">4 RIR</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="entrySide">Unilateral Side</label>
+          <select id="entrySide">
+            <option value="N/A">N/A (Bilateral)</option>
+            <option value="Left">Left Side Focus</option>
+            <option value="Right">Right Side Focus</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="entryDate">Date</label>
+          <input type="date" id="entryDate" required>
+        </div>
+        <div class="form-group full-width">
+          <label for="entryNotes">Form Feedback &amp; Execution Notes</label>
+          <textarea id="entryNotes" placeholder="Tempo notes, RPE sensations, drop sets, lumbar stiffness check..."></textarea>
+        </div>
+      </div>
+      <div class="form-buttons">
+        <button type="submit">Save Set Entry</button>
+        <button type="button" class="secondary" id="clearLogBtn">Clear All Saved Log Data</button>
+      </div>
+    </form>
+
+    <div class="entries" id="entriesContainer">
+      <div class="section-title">Saved Workout Entries</div>
+      <div id="entriesList"></div>
+    </div>
+
+    <div class="nav-buttons">
+      <button type="button" data-nav="mobility">&larr; Previous: Mobility</button>
+      <button class="spacer">Next</button>
+    </div>
+  </div>
+
+  <footer>
+    Hypertrophy &amp; Hinge Re-entry Tracker v3.4 - Freak Athlete Hyper Pro Edition
+  </footer>
+</div>
+
+<script>
+// Exercise Matrix (Excluding warm-ups and mobility)
+const PROGRAM_EXERCISES = {
+  day1: [
+    "Barbell Bench Press",
+    "B1. Ring / Neutral-Grip Pull-Ups",
+    "B2. 75-Degree Seated DB Overhead Press",
+    "C1. Chest-Supported Barbell / DB Seal Row",
+    "C2. Incline DB Skullcrushers (30-Degree)",
+    "D1. Incline DB Curls (45-Degree)",
+    "D2. Bench-Braced DB Lateral Raises",
+    "E. Ab Wheel Rollout"
+  ],
+  day2: [
+    "A. Belt Squat (Hyper Pro)",
+    "B. DB Bulgarian Split Squat",
+    "C1. Leg Extensions (Hyper Pro)",
+    "C2. DB Deficit Calf Raises",
+    "D. 45-Degree Back Extensions",
+    "E. Hanging Ring / Bar Knee Tucks"
+  ],
+  day3: [
+    "A. Chest-Supported DB Lat Rows",
+    "B1. Ring Dips",
+    "B2. Standing DB Hammer Curls",
+    "C1. Chest-Supported DB Rear Delt Flyes",
+    "C2. 30-Degree Incline Chest-Supported DB Y-Raises",
+    "D. Decline Thoracic Crunches (Hyper Pro)"
+  ],
+  day4: [
+    "A. DB B-Stance RDL (Kickstand)",
+    "B. Lying Hamstring Curls (Hyper Pro)",
+    "C. Barbell Hip Thrusts",
+    "D. Reverse Hypers (Hyper Pro)",
+    "E. DB Suitcase Carries"
+  ]
+};
+
+const DAY_LABELS = {
+  day1: "Day 1: Upper A",
+  day2: "Day 2: Lower A",
+  day3: "Day 3: Upper B",
+  day4: "Day 4: Lower B"
+};
+
+// Navigation
+const tabs = document.querySelectorAll('nav.tabs button');
+const days = document.querySelectorAll('.day');
+
+function setActiveTab(targetId) {
+  tabs.forEach(t => {
+    const isTarget = t.dataset.target === targetId;
+    t.classList.toggle('active', isTarget);
+    t.setAttribute('aria-selected', isTarget ? 'true' : 'false');
+  });
+  days.forEach(d => {
+    d.classList.toggle('active', d.id === targetId);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => setActiveTab(tab.dataset.target));
+});
+
+document.querySelectorAll('button[data-nav]').forEach(btn => {
+  btn.addEventListener('click', () => setActiveTab(btn.dataset.nav));
+});
+
+// Dynamic Exercise Selection Populate
+const daySelect = document.getElementById('entryDay');
+const exerciseSelect = document.getElementById('entryExercise');
+
+function populateExercises(dayKey) {
+  const exercises = PROGRAM_EXERCISES[dayKey] || [];
+  exerciseSelect.innerHTML = exercises.map(ex => `<option value="${ex}">${ex}</option>`).join('');
+}
+
+daySelect.addEventListener('change', (e) => {
+  populateExercises(e.target.value);
+});
+
+// Local Storage & ID Sync
+const STORAGE_KEY = 'hypertrophy_hinge_v3_entries';
+
+function loadEntries() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveEntries(entries) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.toString()
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function renderEntries() {
+  const entries = loadEntries();
+  const sorted = [...entries].sort((a, b) => new Date(b.date || b.timestamp) - new Date(a.date || a.timestamp));
+  const container = document.getElementById('entriesList');
+  
+  if (sorted.length === 0) {
+    container.innerHTML = '<p style="color: #9aa3b2; font-size: 13px; font-style: italic;">No workout entries recorded yet. Log your first set above.</p>';
+    return;
+  }
+
+  container.innerHTML = sorted.map(e => {
+    let meta = [];
+    if (e.weight) meta.push(`${e.weight} lbs`);
+    if (e.reps) meta.push(`${e.reps}`);
+    if (e.rir !== undefined && e.rir !== '') meta.push(`RIR ${e.rir}`);
+    if (e.side && e.side !== 'N/A') meta.push(`Side: ${e.side}`);
+    if (e.date) meta.push(e.date);
+
+    return `
+      <div class="entry">
+        <div class="entry-head">
+          <span class="entry-exercise">${escapeHtml(e.exercise)} <button type="button" class="entry-delete" data-id="${e.id}">Delete</button></span>
+          <span class="entry-meta">${escapeHtml(DAY_LABELS[e.day] || e.day)}</span>
+        </div>
+        <div class="entry-meta">${meta.join(' • ')}</div>
+        ${e.notes ? `<div class="entry-notes">${escapeHtml(e.notes)}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+
+  container.querySelectorAll('.entry-delete').forEach(btn => {
+    btn.addEventListener('click', () => deleteEntry(btn.dataset.id));
+  });
+}
+
+function addEntry(event) {
+  event.preventDefault();
+  const selectedDay = daySelect.value;
+  const entry = {
+    id: Date.now().toString(),
+    day: selectedDay,
+    exercise: exerciseSelect.value,
+    weight: document.getElementById('entryWeight').value,
+    reps: document.getElementById('entryReps').value.trim(),
+    rir: document.getElementById('entryRIR').value,
+    side: document.getElementById('entrySide').value,
+    date: document.getElementById('entryDate').value,
+    notes: document.getElementById('entryNotes').value.trim(),
+    timestamp: new Date().toISOString()
+  };
+
+  const entries = loadEntries();
+  entries.push(entry);
+  saveEntries(entries);
+  renderEntries();
+
+  // Reset form maintaining current day selection
+  const currentDate = document.getElementById('entryDate').value;
+  event.target.reset();
+  daySelect.value = selectedDay;
+  populateExercises(selectedDay);
+  document.getElementById('entryRIR').value = '2';
+  document.getElementById('entrySide').value = 'N/A';
+  document.getElementById('entryDate').value = currentDate;
+}
+
+function deleteEntry(id) {
+  if (!confirm('Delete this saved entry?')) return;
+  let entries = loadEntries();
+  entries = entries.filter(e => e.id !== id);
+  saveEntries(entries);
+  renderEntries();
+}
+
+function clearLog() {
+  if (confirm('Are you sure you want to clear all logged data? This cannot be undone.')) {
+    localStorage.removeItem(STORAGE_KEY);
+    renderEntries();
+  }
+}
+
+// Initialization
+document.getElementById('logForm').addEventListener('submit', addEntry);
+document.getElementById('clearLogBtn').addEventListener('click', clearLog);
+
+// Set local date without UTC offset issues
+const today = new Date();
+const localDate = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+document.getElementById('entryDate').value = localDate;
+
+populateExercises(daySelect.value);
+renderEntries();
+</script>
+</body>
+</html>

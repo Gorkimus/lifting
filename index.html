@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<title>Hypertrophy &amp; Hinge Re-entry Tracker v4.0</title>
+<title>Hypertrophy &amp; Hinge Re-entry Tracker v4.1</title>
 <style>
 :root {
   --bg: #0f1216;
@@ -212,6 +212,11 @@ input.notes-in:focus { outline: none; border-color: var(--blue); }
 .vstatus { color: var(--mut); font-size: 12px; margin-top: 8px; min-height: 16px; }
 .suggest { color: var(--amber); font-size: 12px; margin-top: 10px; }
 .lastline { color: var(--mut); font-size: 12px; margin-top: 10px; }
+.editline { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.editline label { font-size: 11px; color: var(--mut); }
+.editline input.ctl { min-height: 36px; padding: 5px 8px; width: 72px; }
+.editline select.ctl { min-height: 36px; padding: 5px 8px; width: auto; }
+.setline.editing { background: rgba(79, 140, 255, 0.06); border-radius: 4px; padding: 6px; }
 
 /* ---------- History ---------- */
 .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
@@ -226,11 +231,26 @@ input.notes-in:focus { outline: none; border-color: var(--blue); }
 .setline .exn { font-weight: 600; }
 .setline .sets { color: #cfd5e0; }
 .setline .nt { color: var(--mut); font-style: italic; font-size: 12px; }
-.delset {
+.delset, .editset {
   background: transparent; border: 1px solid var(--line); color: var(--mut);
   border-radius: 4px; cursor: pointer; font-size: 10px; padding: 2px 7px; flex-shrink: 0;
 }
 .delset:hover { background: var(--red); border-color: var(--red); color: #fff; }
+.editset:hover { background: var(--blue); border-color: var(--blue); color: #fff; }
+.setrow { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px dashed var(--line); font-size: 12px; color: #cfd5e0; }
+.setrow:first-child { border-top: none; }
+.setrow.editing { color: var(--blue); }
+.sr-b { display: flex; gap: 6px; flex-shrink: 0; }
+.lcsets { margin-top: 10px; }
+.mini {
+  background: var(--panel); border: 1px solid var(--line); color: var(--mut);
+  border-radius: 4px; padding: 4px 10px; font-size: 11px; cursor: pointer;
+  font-family: inherit; min-height: 30px;
+}
+.mini.ok { border-color: var(--blue); color: var(--blue); }
+.mini.danger { color: #f87171; }
+.mini:hover { background: var(--panel2); }
+.linkish { background: none; border: none; color: var(--amber); text-decoration: underline; cursor: pointer; font-size: 12px; padding: 0; font-family: inherit; }
 .empty { color: var(--mut); font-size: 13px; font-style: italic; }
 
 /* ---------- Settings ---------- */
@@ -254,7 +274,7 @@ footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line);
 <body>
 <div class="container">
   <header>
-    <h1>Hypertrophy &amp; Hinge Re-entry Tracker <span class="version">v4.0</span></h1>
+    <h1>Hypertrophy &amp; Hinge Re-entry Tracker <span class="version">v4.1</span></h1>
     <div class="subtitle">Upper/Lower &middot; Antagonist Supersets &middot; Spine-Sparing &middot; Hyper Pro Edition</div>
   </header>
 
@@ -285,7 +305,7 @@ footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line);
     </section>
   </main>
 
-  <footer>Lifting Tracker v4.0 &middot; All data stays on this device &middot; Export backups regularly from History</footer>
+  <footer>Lifting Tracker v4.1 &middot; All data stays on this device &middot; Export backups regularly from History</footer>
 </div>
 <div id="toast" class="toast"></div>
 
@@ -542,7 +562,7 @@ function showPanel(id) {
 
 /* ================= program tab ================= */
 
-const state = { progDay: 'day1', openEx: null, sessOverride: '', histEx: '', histDay: '' };
+const state = { progDay: 'day1', openEx: null, sessOverride: '', histEx: '', histDay: '', editingSetId: null, histEditId: null };
 
 function renderProtocol() {
   $('#protocolBox').innerHTML =
@@ -748,12 +768,60 @@ function logSet(exId) {
   }
 
   const sets = allSets();
+  if (state.editingSetId) {
+    const idx = sets.findIndex(s => s.id === state.editingSetId);
+    if (idx >= 0) {
+      entry.id = sets[idx].id;
+      entry.sessionId = sets[idx].sessionId;
+      entry.ts = sets[idx].ts;
+      sets[idx] = entry;
+      if (save(DB.sets, sets)) {
+        state.editingSetId = null;
+        d.notes = '';
+        toast('Set updated \u2713');
+        renderSession();
+      }
+      return;
+    }
+    state.editingSetId = null;
+  }
   sets.push(entry);
   if (save(DB.sets, sets)) {
     d.notes = '';
     toast('Set logged \u2713');
     renderSession();
   }
+}
+
+function startEditSet(exId, setId) {
+  const ex = EX[exId];
+  const s = allSets().find(x => x.id === setId);
+  if (!ex || !s) return;
+  ensureDraft(ex);
+  const d = draft[exId];
+  d.weight = s.weight != null ? s.weight : (ex.log.defaultWeight || 0);
+  d.reps = s.reps != null ? String(s.reps) : '';
+  d.distance = s.distance != null ? s.distance : (ex.log.defaultDistance || 35);
+  d.rir = s.rir != null ? s.rir : (ex.defaultRir != null ? ex.defaultRir : 2);
+  d.side = s.side || (ex.unilateral ? 'L' : null);
+  d.techniques = new Set(s.techniques || []);
+  d.notes = s.notes || '';
+  state.editingSetId = setId;
+  state.openEx = exId;
+  renderSession();
+}
+
+function cancelEditSet() {
+  state.editingSetId = null;
+  renderSession();
+}
+
+function delSessionSet(exId, setId) {
+  if (!confirm('Delete this set?')) return;
+  save(DB.sets, allSets().filter(s => s.id !== setId));
+  if (state.editingSetId === setId) state.editingSetId = null;
+  toast('Set deleted');
+  renderSession();
 }
 
 /* ================= session: render ================= */
@@ -786,7 +854,7 @@ function renderSession() {
       `<button class="exrow-head" data-ex="${ex.id}" aria-expanded="${isOpen}">` +
       `<span class="r1"><span class="nm">${escapeHtml(ex.block)}. ${escapeHtml(ex.name)}</span><span class="rx">${escapeHtml(ex.rx)}</span></span>` +
       `<span class="r2"><span class="sum">${escapeHtml(summaryLine(ex))}</span><span class="dots">${dots}</span></span>` +
-      `</button>${isOpen ? logCardHtml(ex, done.length) : ''}</div>`;
+      `</button>${isOpen ? logCardHtml(ex, done) : ''}</div>`;
   }).join('');
 
   body.innerHTML =
@@ -800,11 +868,13 @@ function renderSession() {
   }));
 }
 
-function logCardHtml(ex, loggedCount) {
+function logCardHtml(ex, loggedSets) {
   ensureDraft(ex);
   const d = draft[ex.id];
   const id = ex.id;
   const t = ex.log.type;
+  const loggedCount = loggedSets.length;
+  const editIdx = loggedSets.findIndex(s => s.id === state.editingSetId);
 
   let fields = '';
   if (t === 'weight' || t === 'bodyweight' || t === 'distance') {
@@ -838,16 +908,30 @@ function logCardHtml(ex, loggedCount) {
     techKeys.map(k => `<button class="chip ${d.techniques.has(k) ? 'on' : ''}" onclick="toggleTech('${id}','${k}')">${TECHNIQUE_LABELS[k]}</button>`).join('') +
     `</div></div>`;
 
-  const saveLabel = t === 'done' ? 'Mark Done' : 'Log Set';
+  const isEdit = editIdx >= 0;
+  const baseLabel = t === 'done' ? 'Mark Done' : (isEdit ? 'Update Set' : 'Log Set');
+  const saveLabel = `${baseLabel} (${loggedCount}/${ex.sets})`;
+
+  const setsListHtml = loggedSets.map((s, i) => {
+    const editing = s.id === state.editingSetId;
+    return `<div class="setrow ${editing ? 'editing' : ''}">` +
+      `<span class="sr-l">Set ${i + 1}: ${escapeHtml(setLabel(s))}${s.rir != null ? ' @' + s.rir + 'R' : ''}${s.side ? ' \u00b7 ' + escapeHtml(s.side) : ''}${s.techniques && s.techniques.length ? ' \u00b7 ' + escapeHtml(s.techniques.map(k => TECHNIQUE_LABELS[k]).join(', ')) : ''}</span>` +
+      `<span class="sr-b">` +
+      `<button class="mini ${editing ? 'ok' : ''}" onclick="startEditSet('${id}','${s.id}')">${editing ? 'Editing' : 'Edit'}</button>` +
+      `<button class="mini danger" onclick="delSessionSet('${id}','${s.id}')">\u00d7</button>` +
+      `</span></div>`;
+  }).join('');
 
   return `<div class="logcard">` +
+    (editIdx >= 0 ? `<div class="suggest">\u270E Editing set ${editIdx + 1} \u2014 change the values, then press Update. <button class="linkish" onclick="cancelEditSet()">cancel</button></div>` : '') +
     (suggestion(ex) ? `<div class="suggest">\u2191 ${escapeHtml(suggestion(ex))}</div>` : '') +
     fields + rirRow + sideRow + techRow +
     `<div class="lcrow"><span class="fieldlbl">Notes</span><input class="notes-in" placeholder="Optional \u2014 cue reminders, how it felt\u2026" oninput="setDraft('${id}','notes',this.value)"></div>` +
     `<div class="lcbtns">` +
     `<button class="btn mic" id="mic-${id}" title="Voice log" onclick="toggleMic('${id}')">\uD83C\uDF99</button>` +
-    `<button class="btn primary save" onclick="logSet('${id}')">${saveLabel} (${loggedCount}/${ex.sets})</button></div>` +
+    `<button class="btn primary save" onclick="logSet('${id}')">${saveLabel}</button></div>` +
     `<div class="vstatus" id="vs-${id}"></div>` +
+    (setsListHtml ? `<div class="lcsets">${setsListHtml}</div>` : '') +
     `<div class="lastline">${escapeHtml(summaryLine(ex))}</div>` +
     `</div>`;
 }
@@ -1088,11 +1172,13 @@ function renderHistory() {
   $('#fEx').addEventListener('change', e => { state.histEx = e.target.value; renderHistory(); });
   $('#fDay').addEventListener('change', e => { state.histDay = e.target.value; renderHistory(); });
   $('#exportBtn').addEventListener('click', exportData);
+  $$('#histList .editset').forEach(b => b.addEventListener('click', () => startHistEdit(b.dataset.edit)));
   $$('#histList .delset').forEach(b => b.addEventListener('click', () => delSet(b.dataset.set)));
   $$('#histList .delsess').forEach(b => b.addEventListener('click', () => delSession(b.dataset.sess)));
 }
 
 function setLineHtml(s, ex, showExName) {
+  if (state.histEditId === s.id) return `<div class="setline editing">${histEditHtml(s, ex)}</div>`;
   const metaBits = [];
   if (s.rir != null) metaBits.push(s.rir + ' RIR');
   if (s.side) metaBits.push(s.side);
@@ -1104,7 +1190,61 @@ function setLineHtml(s, ex, showExName) {
     `<span class="sets">${escapeHtml(main)}</span>` +
     (metaBits.length ? ` <span class="nt">(${escapeHtml(metaBits.join(' \u00b7 '))})</span>` : '') +
     `${s.notes ? ` <span class="nt">${escapeHtml(s.notes)}</span>` : ''}</span>` +
-    `<button class="delset" data-set="${s.id}">del</button></div>`;
+    `<button class="editset" data-edit="${s.id}">edit</button><button class="delset" data-set="${s.id}">del</button></div>`;
+}
+
+function histEditHtml(s, ex) {
+  const numIn = (field, val, ph) => `<input class="ctl" inputmode="decimal" data-f="${field}" value="${val == null ? '' : val}" placeholder="${ph}">`;
+  let fields = '';
+  if (ex.log.type === 'weight' || ex.log.type === 'bodyweight' || ex.log.type === 'distance') {
+    fields += `<label>lb</label>${numIn('weight', s.weight, ex.log.type === 'bodyweight' ? '0' : '0')}`;
+  }
+  if (ex.log.type === 'weight' || ex.log.type === 'bodyweight' || ex.log.type === 'done') {
+    fields += `<label>reps</label>${numIn('reps', s.reps, '')}`;
+  }
+  if (ex.log.type === 'distance') {
+    fields += `<label>m</label>${numIn('distance', s.distance, '')}`;
+  }
+  if (ex.log.type !== 'done') {
+    fields += `<label>RIR</label>${numIn('rir', s.rir, '-')}`;
+  }
+  if (ex.unilateral) {
+    fields += `<select class="ctl" data-f="side">` +
+      `<option value="" ${!s.side ? 'selected' : ''}>-</option>` +
+      `<option value="L" ${s.side === 'L' ? 'selected' : ''}>L</option>` +
+      `<option value="R" ${s.side === 'R' ? 'selected' : ''}>R</option></select>`;
+  }
+  return `<form class="editline" onsubmit="saveHistEdit(event,'${s.id}')">${fields}` +
+    `<button type="submit" class="mini ok">Save</button>` +
+    `<button type="button" class="mini" onclick="cancelHistEdit()">Cancel</button></form>`;
+}
+
+function startHistEdit(setId) {
+  state.histEditId = setId;
+  renderHistory();
+}
+
+function cancelHistEdit() {
+  state.histEditId = null;
+  renderHistory();
+}
+
+function saveHistEdit(ev, setId) {
+  ev.preventDefault();
+  const sets = allSets();
+  const idx = sets.findIndex(s => s.id === setId);
+  if (idx < 0) { state.histEditId = null; renderHistory(); return; }
+  const s = sets[idx];
+  const num = v => (v === '' || v == null || isNaN(parseFloat(v))) ? null : parseFloat(v);
+  ev.target.querySelectorAll('[data-f]').forEach(inp => {
+    const f = inp.dataset.f;
+    if (f === 'side') s.side = inp.value || null;
+    else s[f] = num(inp.value);
+  });
+  save(DB.sets, sets);
+  state.histEditId = null;
+  renderHistory();
+  toast('Set updated \u2713');
 }
 
 function sessionCardHtml(se, allSetsArr, isActive) {
@@ -1204,7 +1344,7 @@ function renderSettings() {
     `<p class="hint">Backups contain sessions and sets \u2014 not your API key. Export before switching phones or clearing browser data.</p></div>` +
 
     `<div class="section"><div class="section-title">About</div>` +
-    `<p class="hint" style="margin-top:0">v4.0 \u2014 rebuilt as a session-first logger: start a session, tap through exercises with last-time weights prefilled, voice-log sets, and watch progression nudges. Program edits live in the PROGRAM block at the top of index.html; logs reference exercises by stable id so renames never break history.</p></div>`;
+    `<p class="hint" style="margin-top:0">v4.1 \u2014 session-first logger: start a session, tap through exercises with last-time weights prefilled, voice-log sets, and watch progression nudges. Logged a set wrong? Edit or delete it right in the exercise card, or edit any past set from History. Program edits live in the PROGRAM block at the top of index.html; logs reference exercises by stable id so renames never break history.</p></div>`;
 
   $('#saveSettings').addEventListener('click', () => {
     save(DB.settings, {

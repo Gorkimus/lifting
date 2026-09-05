@@ -1,4 +1,4 @@
-# Hypertrophy & Hinge Re-entry Tracker v4.0
+# Hypertrophy & Hinge Re-entry Tracker v4.1
 
 A single-file, build-free workout tracker. Upper/Lower split with antagonist
 supersets, designed around spine-sparing (no standing axial loading) on a home
@@ -28,6 +28,10 @@ bands, and a weight vest.
 - Progression nudges: hit the top of every rep range → it suggests the next
   jump (+2.5 barbell, +5 DB, vest at the 45 lb DB cap). Missed reps → it says
   hold the weight and skip the finisher.
+- Mistakes: every set logged this session appears in the exercise's card with
+  **Edit** and **×** controls — Edit loads it back into the form, saving
+  updates it in place. Past sessions: tap **edit** on any set line in History
+  for an inline number fix.
 - **History tab** → everything grouped by session, filterable, JSON
   export/import for backups. Export regularly.
 

@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<title>Hypertrophy &amp; Hinge Re-entry Tracker v4.2</title>
+<title>Hypertrophy &amp; Hinge Re-entry Tracker v4.3</title>
 <style>
 :root {
   --bg: #0f1216;
@@ -284,7 +284,7 @@ footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line);
 <body>
 <div class="container">
   <header>
-    <h1>Hypertrophy &amp; Hinge Re-entry Tracker <span class="version">v4.2</span></h1>
+    <h1>Hypertrophy &amp; Hinge Re-entry Tracker <span class="version">v4.3</span></h1>
     <div class="subtitle">Upper/Lower &middot; Antagonist Supersets &middot; Spine-Sparing &middot; Hyper Pro Edition</div>
   </header>
 
@@ -315,7 +315,7 @@ footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line);
     </section>
   </main>
 
-  <footer>Lifting Tracker v4.2 &middot; All data stays on this device &middot; Export backups regularly from History</footer>
+  <footer>Lifting Tracker v4.3 &middot; All data stays on this device &middot; Export backups regularly from History</footer>
 </div>
 <div id="toast" class="toast"></div>
 
@@ -468,19 +468,23 @@ const PROGRAM = {
           rx: '4 \u00d7 8\u201310 / side @ 2 RIR', sets: 4, rangeLo: 8, rangeHi: 10, defaultRir: 2, dbCapped: true, unilateral: true,
           log: { type: 'weight', step: 5, defaultWeight: 45 },
           note: '<strong>Form:</strong> 80/20 stance. Contralateral DB in the opposite hand. Hips drive straight back; 3s eccentric, 1s pause at the deep hamstring stretch.' },
-        { id: 'd4-hamcurl', block: 'B', name: 'Lying Hamstring Curls (Hyper Pro)', tag: 'Hamstrings \u00b7 Knee Flexion',
+        { id: 'd4-nordic', block: 'B', name: 'Nordic Curls (Hyper Pro)', tag: 'Hamstrings \u00b7 Eccentric',
+          rx: '3 \u00d7 4\u20136 (3s eccentric)', sets: 3, rangeLo: 4, rangeHi: 6, defaultRir: 2,
+          log: { type: 'weight', step: 5, defaultWeight: 0 },
+          note: 'Start on the <strong>incline regression</strong>: hips locked in extension, lower under control over ~3s, curl back up (hands may assist the last bit). Progress by adding reps, then flattening the incline; decline/band-assisted come later. No intensity techniques on these yet \u2014 and expect real soreness the first weeks. Log weight 0 (bodyweight).' },
+        { id: 'd4-inclinecurl', block: 'C', name: 'Incline Hamstring Curls (Hyper Pro)', tag: 'Hamstrings \u00b7 Long-Length',
           rx: '4 \u00d7 10\u201312 @ 1 RIR', sets: 4, rangeLo: 10, rangeHi: 12, defaultRir: 1,
           log: { type: 'weight', step: 5, defaultWeight: 30 }, tech: ['myo-reps'],
-          note: 'Direct knee-flexion isolation. <strong>Advanced:</strong> myo-reps on Set 4 (activation to 1 RIR \u2192 3\u00d73 mini-sets, 15s rest).' },
-        { id: 'd4-hipthrust', block: 'C', name: 'Barbell Hip Thrust', tag: 'Glute Max',
+          note: '<strong>Setup:</strong> bench tilted head-end up, hips just behind the ankle roller, legs down the slope \u2014 you should feel a gentle hamstring stretch at full extension. That length is the point. <strong>Advanced:</strong> myo-reps on Set 4.' },
+        { id: 'd4-hipthrust', block: 'D', name: 'Barbell Hip Thrust', tag: 'Glute Max',
           rx: '3 \u00d7 8\u201312 @ 1\u20132 RIR', sets: 3, rangeLo: 8, rangeHi: 12, defaultRir: 2,
           log: { type: 'weight', step: 5, defaultWeight: 135 },
           note: 'Bar loaded across the hips. Drive through midfoot/heels; 2s peak posterior-tilt lockout without lumbar hyperextension.' },
-        { id: 'd4-revhyper', block: 'D', name: 'Reverse Hypers (Hyper Pro)', tag: 'Recovery \u00b7 Decompression',
+        { id: 'd4-revhyper', block: 'E', name: 'Reverse Hypers (Hyper Pro)', tag: 'Recovery \u00b7 Decompression',
           rx: '3 \u00d7 12\u201315 (bodyweight)', sets: 3, rangeLo: 12, rangeHi: 15, defaultRir: null,
           log: { type: 'done', step: 5, defaultWeight: 0 },
           note: 'Bodyweight by design \u2014 decompression and erector recovery after hinging and thrusting, not a loading exercise. Just log it done.' },
-        { id: 'd4-carry', block: 'E', name: 'DB Suitcase Carries', tag: 'Core \u00b7 Anti-Lateral Finisher',
+        { id: 'd4-carry', block: 'F', name: 'DB Suitcase Carries', tag: 'Core \u00b7 Anti-Lateral Finisher',
           rx: '3 \u00d7 30\u201340m / side @ 2 RIR', sets: 3, rangeLo: 30, rangeHi: 40, defaultRir: 2, dbCapped: true, unilateral: true,
           log: { type: 'distance', step: 5, defaultWeight: 45, defaultDistance: 35 },
           note: 'Single heavy DB. Walk tall and upright with zero lateral lean. Alternate which hand leads first each session.' }
@@ -1539,7 +1543,7 @@ function renderSettings() {
     `<p class="hint">Backups contain sessions and sets \u2014 not your API key. Export before switching phones or clearing browser data.</p></div>` +
 
     `<div class="section"><div class="section-title">About</div>` +
-    `<p class="hint" style="margin-top:0">v4.2 \u2014 session-first logger with progress tracking: per-exercise sparkline and PR detection in History, one-tap weight progression, stall detection (last 3 sessions vs prior 3, ~5 weeks per lift), a session recap on finish, and backup reminders. Program edits live in the PROGRAM block at the top of index.html; logs reference exercises by stable id so renames never break history.</p></div>`;
+    `<p class="hint" style="margin-top:0">v4.3 \u2014 program update: Day 4 hamstring work is now Nordic Curls (eccentric) + Incline Hamstring Curls (long-length). Everything else from v4.2 stands: progress sparklines, PR detection, stall detection, one-tap progression, session recap, backup reminders. Program edits live in the PROGRAM block at the top of index.html; logs reference exercises by stable id so renames never break history.</p></div>`;
 
   $('#saveSettings').addEventListener('click', () => {
     save(DB.settings, Object.assign(load(DB.settings, {}), {

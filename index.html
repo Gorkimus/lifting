@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<title>Hypertrophy &amp; Hinge Re-entry Tracker v4.3</title>
+<title>Hypertrophy &amp; Hinge Re-entry Tracker v4.4</title>
 <style>
 :root {
   --bg: #0f1216;
@@ -261,6 +261,7 @@ input.notes-in:focus { outline: none; border-color: var(--blue); }
 .st-bad { color: var(--red); font-weight: 600; }
 .recap-grid { display: grid; gap: 6px; font-size: 14px; margin: 10px 0 14px; }
 .recap-grid b { color: var(--blue); }
+.copyout { width: 100%; min-height: 240px; margin-top: 10px; background: var(--bg); border: 1px solid var(--line); color: var(--text); border-radius: 6px; padding: 10px; font-family: Consolas, Menlo, monospace; font-size: 12px; line-height: 1.45; white-space: pre; }
 .empty { color: var(--mut); font-size: 13px; font-style: italic; }
 
 /* ---------- Settings ---------- */
@@ -284,7 +285,7 @@ footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line);
 <body>
 <div class="container">
   <header>
-    <h1>Hypertrophy &amp; Hinge Re-entry Tracker <span class="version">v4.3</span></h1>
+    <h1>Hypertrophy &amp; Hinge Re-entry Tracker <span class="version">v4.4</span></h1>
     <div class="subtitle">Upper/Lower &middot; Antagonist Supersets &middot; Spine-Sparing &middot; Hyper Pro Edition</div>
   </header>
 
@@ -315,7 +316,7 @@ footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line);
     </section>
   </main>
 
-  <footer>Lifting Tracker v4.3 &middot; All data stays on this device &middot; Export backups regularly from History</footer>
+  <footer>Lifting Tracker v4.4 &middot; All data stays on this device &middot; Export backups regularly from History</footer>
 </div>
 <div id="toast" class="toast"></div>
 
@@ -1519,6 +1520,47 @@ function importData(file) {
 
 /* ================= settings ================= */
 
+function stripTags(html) {
+  const d = document.createElement('div');
+  d.innerHTML = html;
+  return (d.textContent || '').replace(/\s+/g, ' ').trim();
+}
+
+function programText() {
+  const ver = document.querySelector('h1 .version') ? document.querySelector('h1 .version').textContent : '';
+  const lines = [];
+  lines.push('PROGRAM EXPORT - Hypertrophy & Hinge Re-entry Tracker ' + ver);
+  lines.push('Split: Upper/Lower, rotation D1 > D2 > off > D3 > D4 > off');
+  lines.push('Constraints: spine-sparing (low-back injury history) - no standing axial loading, no loaded lumbar flexion/rotation');
+  lines.push('Equipment: Freak Athlete Hyper Pro, adjustable DBs 5-45 lb, Olympic barbell + plates, rings, 20 lb weighted vest, bands');
+  lines.push('');
+  lines.push('DAILY WARM-UP');
+  PROGRAM.dailyWarmup.forEach(w => lines.push('- ' + w.name + ' - ' + w.rx));
+  DAY_ORDER.forEach(k => {
+    const d = PROGRAM.days[k];
+    lines.push('');
+    lines.push(d.label.toUpperCase() + ' (' + d.tag + ')');
+    lines.push('Warm-up: ' + d.warmup.map(w => w.name + ' ' + w.rx).join('; '));
+    d.exercises.forEach(e => {
+      const partners = e.superset ? d.exercises.filter(x => x.superset === e.superset && x.id !== e.id).map(x => x.block) : [];
+      const ss = partners.length ? ' [superset with ' + partners.join(', ') + ']' : '';
+      const tech = (e.tech && e.tech.length) ? ' [techniques: ' + e.tech.map(t => TECHNIQUE_LABELS[t]).join(', ') + ']' : '';
+      lines.push(e.block + '. ' + e.name + ' - ' + e.rx + ss + tech);
+      const note = stripTags(e.note);
+      if (note) lines.push('   ' + note);
+    });
+  });
+  const m = PROGRAM.days.mobility;
+  lines.push('');
+  lines.push(m.label.toUpperCase() + ' (' + m.tag + ')');
+  m.items.forEach(it => {
+    lines.push('- ' + it.name + ' - ' + it.rx);
+    const note = stripTags(it.note);
+    if (note) lines.push('  ' + note);
+  });
+  return lines.join('\n');
+}
+
 function renderSettings() {
   const st = load(DB.settings, {});
   $('#settingsBody').innerHTML =
@@ -1536,9 +1578,11 @@ function renderSettings() {
 
     `<div class="section"><div class="section-title">Data</div>` +
     `<div class="row-btns">` +
+    `<button class="btn" id="copyProgBtn">Copy program as text</button>` +
     `<button class="btn" id="exportBtn2">Export JSON backup</button>` +
     `<button class="btn" id="importBtn">Import backup</button>` +
     `<button class="btn danger" id="wipeBtn">Erase all data</button></div>` +
+    `<textarea id="copyProgOut" class="copyout" readonly style="display:none" spellcheck="false"></textarea>` +
     `<input type="file" id="importFile" accept=".json,application/json" style="display:none">` +
     `<p class="hint">Backups contain sessions and sets \u2014 not your API key. Export before switching phones or clearing browser data.</p></div>` +
 
@@ -1566,6 +1610,21 @@ function renderSettings() {
       });
       toast(res.ok ? 'LLM connection OK \u2713' : 'Failed: HTTP ' + res.status, !res.ok);
     } catch (e) { toast('Failed: ' + e.message, true); }
+  });
+  $('#copyProgBtn').addEventListener('click', async () => {
+    const txt = programText();
+    const out = $('#copyProgOut');
+    out.value = txt;
+    out.style.display = 'block';
+    let ok = false;
+    try { await navigator.clipboard.writeText(txt); ok = true; } catch (e) {}
+    if (ok) {
+      toast('Program copied to clipboard \u2713');
+    } else {
+      out.focus();
+      out.select();
+      toast('Clipboard blocked \u2014 text shown below, copy it manually');
+    }
   });
   $('#exportBtn2').addEventListener('click', exportData);
   $('#importBtn').addEventListener('click', () => $('#importFile').click());

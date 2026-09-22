@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<title>Hypertrophy &amp; Hinge Re-entry Tracker v4.4</title>
+<title>Hypertrophy &amp; Hinge Re-entry Tracker v4.5</title>
 <style>
 :root {
   --bg: #0f1216;
@@ -285,7 +285,7 @@ footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line);
 <body>
 <div class="container">
   <header>
-    <h1>Hypertrophy &amp; Hinge Re-entry Tracker <span class="version">v4.4</span></h1>
+    <h1>Hypertrophy &amp; Hinge Re-entry Tracker <span class="version">v4.5</span></h1>
     <div class="subtitle">Upper/Lower &middot; Antagonist Supersets &middot; Spine-Sparing &middot; Hyper Pro Edition</div>
   </header>
 
@@ -316,7 +316,7 @@ footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line);
     </section>
   </main>
 
-  <footer>Lifting Tracker v4.4 &middot; All data stays on this device &middot; Export backups regularly from History</footer>
+  <footer>Lifting Tracker v4.5 &middot; All data stays on this device &middot; Export backups regularly from History</footer>
 </div>
 <div id="toast" class="toast"></div>
 
@@ -408,7 +408,7 @@ const PROGRAM = {
           log: { type: 'weight', step: 5, defaultWeight: 40 },
           note: 'Done right after the belt squat to pre-exhaust before Bulgarians (equipment flow). 2s peak iso, 3s lowering.' },
         { id: 'd2-bss', block: 'C', name: 'DB Bulgarian Split Squat', tag: 'Quads \u00b7 Unilateral',
-          rx: '3 \u00d7 8\u201312 / side @ 1\u20132 RIR', sets: 3, rangeLo: 8, rangeHi: 12, defaultRir: 2, dbCapped: true, unilateral: true,
+          rx: '3 \u00d7 8\u201312 / side @ 1\u20132 RIR', sets: 3, rangeLo: 8, rangeHi: 12, defaultRir: 2, dbCapped: true,
           log: { type: 'weight', step: 5, defaultWeight: 35 },
           note: 'Torso tall for quad bias. DBs or vest. Loads read lower after the pre-exhaust \u2014 that is expected. <strong>Advanced:</strong> 3 bottom-half pulses after failure on Set 3.' },
         { id: 'd2-backext', block: 'D1', name: '45\u00b0 Back Extensions (Hyper Pro)', tag: 'Glutes \u00b7 Erectors \u00b7 SS w/ D2', superset: 'D',
@@ -419,10 +419,10 @@ const PROGRAM = {
           rx: '3 \u00d7 15\u201320 @ 0\u20131 RIR', sets: 3, rangeLo: 15, rangeHi: 20, defaultRir: 1, dbCapped: true,
           log: { type: 'weight', step: 5, defaultWeight: 40 },
           note: 'On the plyo box/step. 1 full second at the dead-stop bottom stretch \u2014 no tendon bounce.' },
-        { id: 'd2-kneetucks', block: 'E', name: 'Hanging Knee Tucks', tag: 'Core \u00b7 Decompression',
-          rx: '3 \u00d7 10\u201312 @ 1 RIR', sets: 3, rangeLo: 10, rangeHi: 12, defaultRir: 1,
+        { id: 'd3-crunch', block: 'E', name: 'Decline Thoracic Crunches (Hyper Pro)', tag: 'Core \u00b7 Shortened Rectus',
+          rx: '3 \u00d7 12\u201315 @ 1 RIR', sets: 3, rangeLo: 12, rangeHi: 15, defaultRir: 1,
           log: { type: 'weight', step: 5, defaultWeight: 0 },
-          note: 'Active shoulder hang. Curl the belt buckle to the sternum (posterior pelvic tilt), 1s hold at top, lower without swinging.' }
+          note: 'Unweighted. Sacrum and lumbar pinned; flex only through the thoracic spine, 1s peak squeeze. Zero hip-flexor pull.' }
       ]
     },
     day3: {
@@ -452,10 +452,10 @@ const PROGRAM = {
           rx: '3 \u00d7 12\u201315 @ 0\u20131 RIR', sets: 3, rangeLo: 12, rangeHi: 15, defaultRir: 1, dbCapped: true,
           log: { type: 'weight', step: 5, defaultWeight: 5 },
           note: 'Chest-down on the 30\u00b0 bench, raise in a Y with thumbs up.' },
-        { id: 'd3-crunch', block: 'D', name: 'Decline Thoracic Crunches (Hyper Pro)', tag: 'Core \u00b7 Shortened Rectus',
-          rx: '3 \u00d7 12\u201315 @ 1 RIR', sets: 3, rangeLo: 12, rangeHi: 15, defaultRir: 1,
+        { id: 'd2-kneetucks', block: 'D', name: 'Hanging Knee Tucks', tag: 'Core \u00b7 Decompression',
+          rx: '3 \u00d7 10\u201312 @ 1 RIR', sets: 3, rangeLo: 10, rangeHi: 12, defaultRir: 1,
           log: { type: 'weight', step: 5, defaultWeight: 0 },
-          note: 'Unweighted. Sacrum and lumbar pinned; flex only through the thoracic spine, 1s peak squeeze. Zero hip-flexor pull.' }
+          note: 'Active shoulder hang. Curl the belt buckle to the sternum (posterior pelvic tilt), 1s hold at top, lower without swinging.' }
       ]
     },
     day4: {
@@ -466,7 +466,7 @@ const PROGRAM = {
       ],
       exercises: [
         { id: 'd4-rdl', block: 'A', name: 'DB B-Stance RDL (Kickstand)', tag: 'Hams/Glutes \u00b7 Standalone',
-          rx: '4 \u00d7 8\u201310 / side @ 2 RIR', sets: 4, rangeLo: 8, rangeHi: 10, defaultRir: 2, dbCapped: true, unilateral: true,
+          rx: '4 \u00d7 8\u201310 / side @ 2 RIR', sets: 4, rangeLo: 8, rangeHi: 10, defaultRir: 2, dbCapped: true,
           log: { type: 'weight', step: 5, defaultWeight: 45 },
           note: '<strong>Form:</strong> 80/20 stance. Contralateral DB in the opposite hand. Hips drive straight back; 3s eccentric, 1s pause at the deep hamstring stretch.' },
         { id: 'd4-nordic', block: 'B', name: 'Nordic Curls (Hyper Pro)', tag: 'Hamstrings \u00b7 Eccentric',
@@ -486,7 +486,7 @@ const PROGRAM = {
           log: { type: 'done', step: 5, defaultWeight: 0 },
           note: 'Bodyweight by design \u2014 decompression and erector recovery after hinging and thrusting, not a loading exercise. Just log it done.' },
         { id: 'd4-carry', block: 'F', name: 'DB Suitcase Carries', tag: 'Core \u00b7 Anti-Lateral Finisher',
-          rx: '3 \u00d7 30\u201340m / side @ 2 RIR', sets: 3, rangeLo: 30, rangeHi: 40, defaultRir: 2, dbCapped: true, unilateral: true,
+          rx: '3 \u00d7 30\u201340m / side @ 2 RIR', sets: 3, rangeLo: 30, rangeHi: 40, defaultRir: 2, dbCapped: true,
           log: { type: 'distance', step: 5, defaultWeight: 45, defaultDistance: 35 },
           note: 'Single heavy DB. Walk tall and upright with zero lateral lean. Alternate which hand leads first each session.' }
       ]
@@ -804,7 +804,6 @@ function ensureDraft(ex) {
     reps: last && last.reps != null ? String(last.reps) : '',
     distance: last && last.distance != null ? last.distance : (ex.log.defaultDistance || 35),
     rir: last && last.rir != null ? last.rir : (ex.defaultRir != null ? ex.defaultRir : 2),
-    side: ex.unilateral ? 'L' : null,
     techniques: new Set(ex.tech || []),
     notes: ''
   };
@@ -828,7 +827,6 @@ function syncDraftInputs(exId) {
   if (ex && ex.log.type === 'bodyweight') { /* weight is added-weight, same input */ }
 }
 function setDraft(exId, field, val) { draft[exId][field] = val; }
-function setDraftSide(exId, side) { draft[exId].side = side; renderSession(); }
 function setDraftRir(exId, val) { draft[exId].rir = val; renderSession(); }
 function toggleTech(exId, key) {
   const t = draft[exId].techniques;
@@ -846,7 +844,6 @@ function logSet(exId) {
   const entry = {
     id: 'set-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
     sessionId: sess.id, exerciseId: exId, ts: Date.now(),
-    side: d.side || null,
     rir: ex.log.type === 'done' ? null : num(d.rir),
     techniques: [...d.techniques],
     notes: (d.notes || '').trim()
@@ -900,7 +897,6 @@ function startEditSet(exId, setId) {
   d.reps = s.reps != null ? String(s.reps) : '';
   d.distance = s.distance != null ? s.distance : (ex.log.defaultDistance || 35);
   d.rir = s.rir != null ? s.rir : (ex.defaultRir != null ? ex.defaultRir : 2);
-  d.side = s.side || (ex.unilateral ? 'L' : null);
   d.techniques = new Set(s.techniques || []);
   d.notes = s.notes || '';
   state.editingSetId = setId;
@@ -998,13 +994,6 @@ function logCardHtml(ex, loggedSets) {
       `</div></div>`;
   }
 
-  let sideRow = '';
-  if (ex.unilateral) {
-    sideRow = `<div class="lcrow"><span class="fieldlbl">Side</span><div class="chips">` +
-      ['L', 'R'].map(s => `<button class="chip ${d.side === s ? 'on' : ''}" onclick="setDraftSide('${id}','${s}')">${s === 'L' ? 'Left' : 'Right'}</button>`).join('') +
-      `</div></div>`;
-  }
-
   const techKeys = [...(ex.tech || []), ...Object.keys(TECHNIQUE_LABELS).filter(k => !(ex.tech || []).includes(k))];
   const techRow = t === 'done' ? '' :
     `<div class="lcrow"><span class="fieldlbl">Technique</span><div class="chips">` +
@@ -1020,7 +1009,7 @@ function logCardHtml(ex, loggedSets) {
   const setsListHtml = loggedSets.map((s, i) => {
     const editing = s.id === state.editingSetId;
     return `<div class="setrow ${editing ? 'editing' : ''}">` +
-      `<span class="sr-l">Set ${i + 1}: ${s.pr ? '\uD83C\uDFC6 ' : ''}${escapeHtml(setLabel(s))}${s.rir != null ? ' @' + s.rir + 'R' : ''}${s.side ? ' \u00b7 ' + escapeHtml(s.side) : ''}${s.techniques && s.techniques.length ? ' \u00b7 ' + escapeHtml(s.techniques.map(k => TECHNIQUE_LABELS[k]).join(', ')) : ''}</span>` +
+      `<span class="sr-l">Set ${i + 1}: ${s.pr ? '\uD83C\uDFC6 ' : ''}${escapeHtml(setLabel(s))}${s.rir != null ? ' @' + s.rir + 'R' : ''}${s.techniques && s.techniques.length ? ' \u00b7 ' + escapeHtml(s.techniques.map(k => TECHNIQUE_LABELS[k]).join(', ')) : ''}</span>` +
       `<span class="sr-b">` +
       `<button class="mini ${editing ? 'ok' : ''}" onclick="startEditSet('${id}','${s.id}')">${editing ? 'Editing' : 'Edit'}</button>` +
       `<button class="mini danger" onclick="delSessionSet('${id}','${s.id}')">\u00d7</button>` +
@@ -1031,7 +1020,7 @@ function logCardHtml(ex, loggedSets) {
     (editIdx >= 0 ? `<div class="suggest">\u270E Editing set ${editIdx + 1} \u2014 change the values, then press Update. <button class="linkish" onclick="cancelEditSet()">cancel</button></div>` : '') +
     (sug.text ? `<div class="suggest">\u2191 ${escapeHtml(sug.text)}${sug.apply != null ? ` <button class="linkish" onclick="applySuggestion('${id}')">${escapeHtml(sug.applyLabel)}</button>` : ''}</div>` : '') +
     (stallTxt ? `<div class="suggest">\u26A0 ${escapeHtml(stallTxt)}</div>` : '') +
-    fields + rirRow + sideRow + techRow +
+    fields + rirRow + techRow +
     `<div class="lcrow"><span class="fieldlbl">Notes</span><input class="notes-in" placeholder="Optional \u2014 cue reminders, how it felt\u2026" oninput="setDraft('${id}','notes',this.value)"></div>` +
     `<div class="lcbtns">` +
     `<button class="btn mic" id="mic-${id}" title="Voice log" onclick="toggleMic('${id}')">\uD83C\uDF99</button>` +
@@ -1166,7 +1155,6 @@ function offlineParse(raw) {
   const md = t.match(/(\d+)\s*(?:m\b|meters?|metres?)/); if (md) out.distance = parseInt(md[1], 10);
   const mrir = t.match(/(\d+)\s*(?:rir|in reserve|reserve)/); if (mrir) out.rir = parseInt(mrir[1], 10);
   if (out.rir == null && /failure/.test(t)) out.rir = 0;
-  if (/\bleft\b/.test(t)) out.side = 'L'; else if (/\bright\b/.test(t)) out.side = 'R';
 
   const techs = [];
   if (/rest\s?pause/.test(t)) techs.push('rest-pause');
@@ -1191,7 +1179,7 @@ async function llmParse(text, ex, off) {
   const ctrl = new AbortController();
   const to = setTimeout(() => ctrl.abort(), 12000);
   const sys = 'You extract structured data from a spoken gym-set description. Reply ONLY with minified JSON, no prose: ' +
-    '{"weight":number|null,"reps":number|null,"rir":number|null,"distance_m":number|null,"side":"L"|"R"|null,"techniques":string[],"notes":string|null}. ' +
+    '{"weight":number|null,"reps":number|null,"rir":number|null,"distance_m":number|null,"techniques":string[],"notes":string|null}. ' +
     'rir = reps in reserve, 0-4. techniques entries must be from: ' + Object.keys(TECHNIQUE_LABELS).join(', ') + '. ' +
     'Context: exercise is "' + ex.name + '", prescription "' + ex.rx + '", weight unit is pounds. Put anything conversational in notes.';
   try {
@@ -1215,7 +1203,6 @@ async function llmParse(text, ex, off) {
       reps: d.reps != null ? d.reps : off.reps,
       rir: d.rir != null ? d.rir : off.rir,
       distance: d.distance_m != null ? d.distance_m : off.distance,
-      side: d.side ? (String(d.side).toUpperCase().startsWith('L') ? 'L' : 'R') : off.side,
       techniques: (Array.isArray(d.techniques) && d.techniques.length) ? d.techniques.filter(k => TECHNIQUE_LABELS[k]) : (off.techniques || []),
       notes: d.notes || ''
     };
@@ -1228,7 +1215,6 @@ function describeParsed(p) {
   if (p.reps != null) parts.push(p.reps + ' reps');
   if (p.distance != null) parts.push(p.distance + ' m');
   if (p.rir != null) parts.push(p.rir + ' RIR');
-  if (p.side) parts.push(p.side === 'L' ? 'left' : 'right');
   if (p.techniques && p.techniques.length) parts.push(p.techniques.map(k => TECHNIQUE_LABELS[k]).join(', '));
   if (p.notes) parts.push('note: ' + p.notes);
   return parts.join(' \u00b7 ') || 'nothing recognized \u2014 type it manually';
@@ -1241,7 +1227,6 @@ function applyParsed(exId, p) {
   if (p.reps != null && ex.log.type !== 'distance') d.reps = String(p.reps);
   if (p.distance != null && ex.log.type === 'distance') d.distance = p.distance;
   if (p.rir != null && ex.log.type !== 'done') d.rir = p.rir;
-  if (p.side) d.side = p.side;
   if (p.techniques) p.techniques.forEach(k => d.techniques.add(k));
   if (p.notes) d.notes = p.notes;
 }
@@ -1379,7 +1364,6 @@ function setLineHtml(s, ex, showExName) {
   if (state.histEditId === s.id) return `<div class="setline editing">${histEditHtml(s, ex)}</div>`;
   const metaBits = [];
   if (s.rir != null) metaBits.push(s.rir + ' RIR');
-  if (s.side) metaBits.push(s.side);
   if (s.techniques && s.techniques.length) metaBits.push(s.techniques.map(k => TECHNIQUE_LABELS[k]).join(', '));
   const main = (s.pr ? '\uD83C\uDFC6 ' : '') + (ex.log.type === 'done'
     ? (s.reps != null ? s.reps + ' reps' : 'done')
@@ -1406,12 +1390,6 @@ function histEditHtml(s, ex) {
   if (ex.log.type !== 'done') {
     fields += `<label>RIR</label>${numIn('rir', s.rir, '-')}`;
   }
-  if (ex.unilateral) {
-    fields += `<select class="ctl" data-f="side">` +
-      `<option value="" ${!s.side ? 'selected' : ''}>-</option>` +
-      `<option value="L" ${s.side === 'L' ? 'selected' : ''}>L</option>` +
-      `<option value="R" ${s.side === 'R' ? 'selected' : ''}>R</option></select>`;
-  }
   return `<form class="editline" onsubmit="saveHistEdit(event,'${s.id}')">${fields}` +
     `<button type="submit" class="mini ok">Save</button>` +
     `<button type="button" class="mini" onclick="cancelHistEdit()">Cancel</button></form>`;
@@ -1435,9 +1413,7 @@ function saveHistEdit(ev, setId) {
   const s = sets[idx];
   const num = v => (v === '' || v == null || isNaN(parseFloat(v))) ? null : parseFloat(v);
   ev.target.querySelectorAll('[data-f]').forEach(inp => {
-    const f = inp.dataset.f;
-    if (f === 'side') s.side = inp.value || null;
-    else s[f] = num(inp.value);
+    s[inp.dataset.f] = num(inp.value);
   });
   save(DB.sets, sets);
   state.histEditId = null;
@@ -1587,7 +1563,7 @@ function renderSettings() {
     `<p class="hint">Backups contain sessions and sets \u2014 not your API key. Export before switching phones or clearing browser data.</p></div>` +
 
     `<div class="section"><div class="section-title">About</div>` +
-    `<p class="hint" style="margin-top:0">v4.3 \u2014 program update: Day 4 hamstring work is now Nordic Curls (eccentric) + Incline Hamstring Curls (long-length). Everything else from v4.2 stands: progress sparklines, PR detection, stall detection, one-tap progression, session recap, backup reminders. Program edits live in the PROGRAM block at the top of index.html; logs reference exercises by stable id so renames never break history.</p></div>`;
+    `<p class="hint" style="margin-top:0">v4.5 \u2014 core finisher swap: Decline Thoracic Crunches moved to Day 2 (Lower A) where the Hyper Pro is already set up, Hanging Knee Tucks moved to Day 3 (Upper B). Per-side (L/R) logging removed \u2014 unilateral exercises now log one set per set; note side details in the set note. Everything from earlier versions stands: progress sparklines, PR detection, stall detection, one-tap progression, session recap, program-as-text export, backup reminders. Program edits live in the PROGRAM block at the top of index.html; logs reference exercises by stable id so reorders never break history.</p></div>`;
 
   $('#saveSettings').addEventListener('click', () => {
     save(DB.settings, Object.assign(load(DB.settings, {}), {
